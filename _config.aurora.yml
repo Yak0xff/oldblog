@@ -11,8 +11,8 @@
 site:
   subtitle: Yak's Blog
   author: Yak-0xff
-  nick: 读书、故事、小思考
-  description: 一位不满现状，就爱瞎折腾的技术人 <br /> @ <b>勿以事小而不为</b>
+  nick: 读书小记、技术思考、树洞...
+  description: 一位不满现状，就爱瞎折腾的技术人 <br /> 🤔 <b>勿以事小而不为</b>
   language: cn
   multi_language: false
   logo: /img/avatar.jpg
@@ -53,6 +53,13 @@ menu:
       cn: '留言板'
       en: 'Message Board'
     path: '/page/message-board'
+  # Swift:
+  #   name: 'Swift Learning'
+  #   i18n:
+  #     cn: 'Swift学习'
+  #     en: 'Swift Learning'
+  #   path: '/tags/search?slug=技术人生'
+
   # projects:
   #   name: 'Projects'
   #   i18n:
