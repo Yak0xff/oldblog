@@ -20,17 +20,17 @@ Software architecture is always a topic for hot debate, specially when there are
 
 The outline of this article is shown below:
 
--   [Modular Architecture](https://azamsharp.com/2023/02/28/building-large-scale-apps-swiftui.html#modular-architecture)
--   [Understanding the MV Pattern](https://azamsharp.com/2023/02/28/building-large-scale-apps-swiftui.html#understanding-the-mv-pattern)
--   [Screens vs Views](https://azamsharp.com/2023/02/28/building-large-scale-apps-swiftui.html#screens-vs-views)
--   [Multiple Aggregate Models](https://azamsharp.com/2023/02/28/building-large-scale-apps-swiftui.html#multiple-aggregate-models)
--   [View Specific Logic](https://azamsharp.com/2023/02/28/building-large-scale-apps-swiftui.html#view-specific-logic)
--   [Validation](https://azamsharp.com/2023/02/28/building-large-scale-apps-swiftui.html#validation)
--   [Navigation](https://azamsharp.com/2023/02/28/building-large-scale-apps-swiftui.html#navigation)
--   [Grouping View Events](https://azamsharp.com/2023/02/28/building-large-scale-apps-swiftui.html#grouping-view-events)
--   [Testing](https://azamsharp.com/2023/02/28/building-large-scale-apps-swiftui.html#testing)
+-   Modular Architecture
+-   Understanding the MV Pattern
+-   Screens vs Views
+-   Multiple Aggregate Models
+-   View Specific Logic
+-   Validation
+-   Navigation
+-   Grouping View Events
+-   Testing
 
-## Modular Architecture[](https://azamsharp.com/2023/02/28/building-large-scale-apps-swiftui.html#modular-architecture)
+## Modular Architecture
 
 Modular architecture in software refers to the design and organization of software systems into small, self contained modules or components. These modules can be tested and maintained independently of one another. Each module serves a specific purpose and solve a specific business requirement.
 
@@ -42,7 +42,7 @@ Modularity can be achieved in several different ways. You can expose each module
 
 > The focus of this article is not Swift Package Manager, but how to achieve modularity by breaking the app based on the bounded context of the application. **Swift Package Manager can be used to package those dependencies into reusable modules.**
 
-## Understanding the MV Pattern[](https://azamsharp.com/2023/02/28/building-large-scale-apps-swiftui.html#understanding-the-mv-pattern)
+## Understanding the MV Pattern
 
 The main idea behind the MV Pattern is to allow views directly talk to the model. This eliminates the need for creating unnecessary view models for each view, which simply contribute to the size of the project but does not provide any additional benefits.
 
@@ -170,7 +170,7 @@ Apart from fetching and persistence, StoreModel can also provide sorting, filter
 
 A single StoreModel is ideal for small or even medium sized apps. But for larger apps it will be a good idea to introduce multiple aggregate models based on the bounded context of the application. In the next section, we will cover multiple aggregate models and how they benefit when working in large teams.
 
-## Multiple Aggregate Models[](https://azamsharp.com/2023/02/28/building-large-scale-apps-swiftui.html#multiple-aggregate-models)
+## Multiple Aggregate Models
 
 As you learned in the previous section, the purpose of an aggregate model is to expose data to your view. As Luca explained in [Data Essentials in SwiftUI WWDC 2020 (11:30)](https://developer.apple.com/videos/play/wwdc2020/10040/) “The aggregate model is an `ObservableObject`, which acts as your data dependency surface. This allows us to model the data using value type and manage its life cycle and side effects with a reference type.”
 
@@ -351,7 +351,7 @@ As discussed earlier, each bounded context is represented by its own module. The
 
 Using this architecture, future business requirements and data access services can be added without interfering with existing ones. This also allows more collaborative environment as different teams can work on different modules without interfering with each other.
 
-## View Specific Logic[](https://azamsharp.com/2023/02/28/building-large-scale-apps-swiftui.html#view-specific-logic)
+## View Specific Logic
 
 In this last section, I talked about how aggregate models can serve as a single source of truth and provide required data to the views. But what about view specific logic? Where should that logic be placed and what options do we have to perform testing on that logic.
 
@@ -531,7 +531,7 @@ In the end you will have to decide where in [testing pyramid](https://martinfowl
 
 > If you want to learn more about testing then you can check out my course [Test Driven Development in iOS Using Swift](https://www.udemy.com/course/test-driven-development-in-ios-using-swift/?referralCode=07649C41E6E184CE86B3).
 
-## Screens vs Views[](https://azamsharp.com/2023/02/28/building-large-scale-apps-swiftui.html#screens-vs-views)
+## Screens vs Views
 
 When I was working with Flutter, I observed a common pattern for organizing the widgets. Flutter developers were separating the widgets based on whether the widgets represents an entire screen of just a reusable control. Since React, Flutter and SwiftUI are extremely similar in nature we can apply the same principles when building SwiftUI applications.
 
@@ -554,7 +554,7 @@ For example when displaying details of a movie, instead of calling that view Mov
 
 I find that it is always a good idea to keep a close eye on our friendly neighbors React and Flutter. You never know what ideas you will bring from other declarative frameworks into SwiftUI.
 
-## Validation[](https://azamsharp.com/2023/02/28/building-large-scale-apps-swiftui.html#validation)
+## Validation
 
 There is a famous saying in software development, garbage in, garbage out. This means if you allow users to enter incorrect information (garbage) through the user interface then that garbage will eventually end up in your database. And usually when this happens, it becomes extremely difficult and time consuming to clean the database.
 
@@ -649,7 +649,7 @@ In the end extracting the form validation into a separate struct and writing uni
 
 I covered few different ways of handling and displaying validation errors in one of my previous articles that you can read [here](https://azamsharp.com/2022/08/09/intro-to-mv-state-pattern.html).
 
-## Displaying Errors[](https://azamsharp.com/2023/02/28/building-large-scale-apps-swiftui.html#displaying-errors)
+## Displaying Errors
 
 Displaying errors is an integral part of any application.
 
@@ -716,7 +716,7 @@ Whenever the errorState changes, a sheet will be displayed with the latest error
 
 This technique allows you to have a single point in your codebase, which is responsible for displaying errors.
 
-## Grouping View Events[](https://azamsharp.com/2023/02/28/building-large-scale-apps-swiftui.html#grouping-view-events)
+## Grouping View Events
 
 One way to create reusable views in SwiftUI is to delegate the events to the parent view. This allows views to be used in different scenarios and without tying them to a particular logic. One way to accomplish this is to use closures.
 
@@ -821,7 +821,7 @@ struct ContentView: View {
 
 In the end you will have to decide when you want to group events into an enum and when you want to use them individually (multiple closures). I tend to prefer using enum events if I have more than two closures exposed by the view.
 
-## Navigation[](https://azamsharp.com/2023/02/28/building-large-scale-apps-swiftui.html#navigation)
+## Navigation
 
 SwiftUI introduced NavigationStack in iOS 16, which allowed developers to configure global routes for their application.
 
@@ -985,7 +985,7 @@ struct ContentView: View {
 
 > I also wrote a book on Navigation API in SwiftUI. If you are interested, you can download it free of charge from [here](https://azamsharp.com/books).
 
-## Testing[](https://azamsharp.com/2023/02/28/building-large-scale-apps-swiftui.html#testing)
+## Testing
 
 > This section of the article is taken from my post [Pragmatic Testing and Avoiding Common Pitfalls](https://azamsharp.com/2012/12/23/pragmatic-unit-testing.html)
 
@@ -995,7 +995,7 @@ Not all applications requires writing tests. If you are building a basic applica
 
 In this article, I will discuss different techniques of writing tests and how a developer can write good tests to get the most return on their investment.
 
-## Not all tests are created equal[](https://azamsharp.com/2023/02/28/building-large-scale-apps-swiftui.html#not-all-tests-are-created-equal)
+## Not all tests are created equal
 
 Consider a scenario that you are writing an application for a bank. One of the business rules is to charge overdraft fees in case of insufficient funds. Banks generate [billions of dollars income by just fees](https://www.depositaccounts.com/blog/banks-income-fees.html) alone. As a developer, you must write good quality tests to make sure that overdraft fee calculation works as expected.
 
@@ -1005,7 +1005,7 @@ In the same bank app, you may have features like rendering templates for emails 
 
 Next time you are writing a test, ask yourself how important this feature is for the business. If it is an integral part of the business then make sure to test it thoroughly and go for high code coverage.
 
-## Test behavior not implementation[](https://azamsharp.com/2023/02/28/building-large-scale-apps-swiftui.html#test-behavior-not-implementation)
+## Test behavior not implementation
 
 One of the biggest mistakes developers make is to focus on writing tests against the implementation details instead of the behavior of the application.
 
@@ -1194,7 +1194,7 @@ This means if you decide to refactor your code and rename the function `fetchPro
 
 > If you are using MVVM pattern then your VM may have logic. It is perfectly fine to write unit tests against the logic contained in the view model.
 
-## End to End Testing[](https://azamsharp.com/2023/02/28/building-large-scale-apps-swiftui.html#end-to-end-testing)
+## End to End Testing
 
 In the previous section, you learned that and mocking in most scenarios does not provide the return on your investment. Tests written that use mocking usually end up being too brittle and can fail because of refactoring, breaking all the dependent tests even though the behavior remained the same.
 
@@ -1260,7 +1260,7 @@ End to end tests are NOT replacement of your domain model tests. You MUST write 
 
 > > You will have to find the right balance as to how often to run end to end tests. If you run it with each code check-in then your continuous integration server will always be running 100% of the time. If you run it once every couple of days then you will be notified of failures much later than expected. Keep in mind that you can run E2E tests locally on your machine. Once you get the desired outcome, the CI server can run all the tests during the code check-in process.
 
-## What about Integration Testing[](https://azamsharp.com/2023/02/28/building-large-scale-apps-swiftui.html#what-about-integration-testing)
+## What about Integration Testing
 
 Integration tests are performed to make sure that two different systems can work together. These systems can be external dependencies like database or API but it can also be different modules within the same system.
 
@@ -1311,7 +1311,7 @@ The above integration test makes sure that the HTTP client layer is working as e
 
 Unmanaged dependencies like payment gateway, SMTP clients etc can be mocked out during integration tests. For managed dependencies, use the concrete implementations.
 
-## Code Coverage[](https://azamsharp.com/2023/02/28/building-large-scale-apps-swiftui.html#code-coverage)
+## Code Coverage
 
 Code coverage is a metric that calculates how much of your code is covered under test. Let’s take a very simple example. In the code below we have a `BankAccount` class, which consists of `deposit` and `withdraw` functions.
 
@@ -1362,7 +1362,7 @@ So, what is the ideal code coverage number. It really depends on the app but any
 
 > > When calculating code coverage make sure to ignore the third party libraries/frameworks as their code coverage is not your responsibility.
 
-## Unit Testing, Data Access and File Access[](https://azamsharp.com/2023/02/28/building-large-scale-apps-swiftui.html#unit-testing-data-access-and-file-access)
+## Unit Testing, Data Access and File Access
 
 Most developers that I have talked to believe that a unit test cannot access a database or a file system. **That is incorrect and plain wrong**. A unit test CAN access a database or a file system.
 
@@ -1388,7 +1388,7 @@ Even thought these benefits looks appealing, I personally do not recommend using
 
 > > It is always a good idea to to make sure that your test environment and production environment are nearly identical in nature.
 
-## Testing View Model Does NOT Validate the User Interface[](https://azamsharp.com/2023/02/28/building-large-scale-apps-swiftui.html#testing-view-model-does-not-validate-the-user-interface)
+## Testing View Model Does NOT Validate the User Interface
 
 Couple of weeks ago, I was having a discussion with another developer, who was mentioning that they test their **user interface** through View Models in SwiftUI. I was not sure what he meant so I checked the source code and found that they had lot of unit tests for their View Models and they were just assuming that if the View Model tests are passing then the user interface will automatically work.
 
@@ -1470,7 +1470,7 @@ The answer is **it depends**. If you have complicated logic in your View Model t
 
 In the end [testing is all about **confidence**](https://azamsharp.com/2023/02/15/testing-is-about-confidence.html). Sometimes you can gain confidence by writing fewer or no tests and other times you have to write more tests to achieve the level of confidence.
 
-## The Ideal test[](https://azamsharp.com/2023/02/28/building-large-scale-apps-swiftui.html#the-ideal-test)
+## The Ideal test
 
 We talked about several different types of tests. You may be wondering what is the best kind of test to write. What is the ideal test?
 
@@ -1480,7 +1480,7 @@ Remember to test the public API exposed by the module and not the implementation
 
 Don’t create protocols/interfaces/contracts with the sole purpose of mocking. If a protocol consists of a single concrete implementation then use the concrete implementation and remove the interface/contract. Your architecture should be based on current business needs and not on what if scenarios that may never happen. Remember YAGNI (You aren’t going to need it). Less code is better than more code.
 
-## Conclusion[](https://azamsharp.com/2023/02/28/building-large-scale-apps-swiftui.html#conclusion)
+## Conclusion
 
 Application architecture is a complicated subject and in the end the best architecture for a project depends on many factors. These factors can include the size and complexity of the project, the team’s skills and experience, the project’s goals and requirements.
 
