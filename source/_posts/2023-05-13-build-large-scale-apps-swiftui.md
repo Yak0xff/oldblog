@@ -3,10 +3,10 @@ layout: post
 author: Yak
 title: 使用 SwiftUI 构建大型应用程序---模块化架构指南
 tags: 
-- Swift Learning
+- SwiftUI
 feature: true
 categories: 
-- 技术人生
+- Swift Learning
 cover: https://raw.githubusercontent.com/zycslog/assets-pro/main/fotis-fotopoulos-SyvsTmuuZyM-unsplash.jpg
 ---
 
