@@ -3,6 +3,7 @@ layout: post
 author: Robin
 title: 如何成为更好的iOS开发工程师之S.O.L.I.D原则
 tags: 开发知识 技术人生
+feature: true
 categories:
 - 技术人生
 cover: '/images/solid/cover.jpg'

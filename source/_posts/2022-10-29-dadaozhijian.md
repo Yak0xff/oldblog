@@ -3,6 +3,7 @@ layout: post
 author: Robin
 title: 《大道至简---软件工程实践者的思想》  读书笔记
 tags: 读书笔记
+feature: true
 categories: 
 - 技术人生
 cover: https://raw.githubusercontent.com/zycslog/assets-pro/main/ryosuke-nasu--Pn_23L3OEs-unsplash.jpg

@@ -105,6 +105,5 @@ theme: aurora
 deploy:
   type: 'git'
   repo: 'https://github.com/zycslog/zycslog.github.io.git'
-  branch: 'main'
-  message: 'deploy'
+  branch: 'gh-pages' 
 
