@@ -10,6 +10,10 @@ categories:
 cover: https://raw.githubusercontent.com/zycslog/assets-pro/main/fotis-fotopoulos-SyvsTmuuZyM-unsplash.jpg
 ---
 
+软件架构始终是一个热门争论的话题，特别是当有这么多不同的选择时。在过去的 8-12 个月里，作者一直在尝试使用 MV 模式来构建客户端/服务器应用程序，并在我最初的文章中写到了这一点 [SwiftUI 架构 - MV 模式方法的完整指南](https://azamsharp.com/2022/10/06/practical-mv-pattern-crud.html)。在本文中，作者将讨论如何将 MV 模式应用于构建大型客户端/服务器应用程序。从SwiftUI本身的设计模式触发，探索SwiftUI在大型应用程序中如何使用MV模式来构建，以及其合理性等，很值得一读。
+
+--- 
+
 Software architecture is always a topic for hot debate, specially when there are so many different choices. For the last 8-12 months, I have been experimenting with MV pattern to build client/server apps and wrote about it in my original article [SwiftUI Architecture - A Complete Guide to MV Pattern Approach](https://azamsharp.com/2022/10/06/practical-mv-pattern-crud.html). In this article, I will discuss how MV pattern can be applied to build large scale client/server applications.
 
 > Architecture and patterns depends on the type of application you are building. No single architecture will work in all scenarios. Choose the best architecture suitable for your application needs.
