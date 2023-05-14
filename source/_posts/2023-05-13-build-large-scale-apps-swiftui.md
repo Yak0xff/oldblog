@@ -50,7 +50,7 @@ MV 模式背后的主要思想是允许视图直接与模型对话。这消除�
 SwiftUI 中的视图让我想起了 ReactJS JSX 语法。让我们看一个非常小的例子。
 
 
-```
+``` js
 function App() {
     return (
         <div>
@@ -101,7 +101,7 @@ Apple 示例项目（包括 [Fruta](https://developer.apple.com/documentation/sw
 
 按照[使用 Xcode 进行服务器端开发](https://developer.apple.com/videos/play/wwdc2022/110360/)讲座中讨论的模式，下面是我为我的应用程序实现的 StoreModel。
 
-```
+``` swift
 class StoreModel: ObservableObject {
     
     private var storeHTTPClient: StoreHTTPClient
@@ -130,7 +130,7 @@ class StoreModel: ObservableObject {
 `StoreModel` 可以以各种不同的方式使用。如果只希望数据可用于特定视图，并且希望将对象与视图的生存期相关联，则可以使用 StoreModel 作为@StateObject。但是我经常发现自己将 StoreModel 添加到@EnvironmentObject，以便它可以在注入的视图及其所有子视图中可用。
 
 
-```
+``` swift
 @main
 struct StoreAppApp: App {
     var body: some Scene {
@@ -146,7 +146,7 @@ struct StoreAppApp: App {
 通过@EnvironmentObject注入 StoreModel 后，可以访问 `StoreModel` ，如下面的实现所示。
 
 
-```
+``` swift
 struct ContentView: View {
 
     @EnvironmentObject private var model: StoreModel
@@ -215,7 +215,7 @@ struct ContentView: View {
 
 `Catalog`聚合模型和`Product`实体的概要如下所示:
 
-```
+``` swift
 
 struct Product: Codable {
     let productId: Int
@@ -260,7 +260,7 @@ class Catalog: ObservableObject {
 目录和订单聚合模型作为环境对象注入到应用程序中。可以直接在应用程序根视图或应用程序每个部分的根视图中注入它们。后者如下所示：
 
 
-```
+``` swift
 @main
 struct StoreApp: App {
     
@@ -278,7 +278,7 @@ struct StoreApp: App {
 现在，在视图中，您可以通过访问`@EnvironmentObject`来使用Catalog或Ordering模型。具体实现如下所示：
 
 
-```
+``` swift
 struct CatalogListScreen: View {
     
     @EnvironmentObject private var catalog: Catalog
@@ -298,7 +298,7 @@ struct CatalogListScreen: View {
 ```
 如果您的视图需要访问订单信息，那么它也可以利用排序聚合模型。
 
-```
+``` swift
 struct AdminDashboardScreen: View {
     
     @EnvironmentObject private var catalog: Catalog
@@ -370,7 +370,7 @@ struct AdminDashboardScreen: View {
 
 在下面的代码中，我们希望根据最低和最高价格过滤产品。实现如下所示：
 
-```
+``` swift
 struct ContentView: View {
     
     let httpClient: HTTPClientProtocol
@@ -455,7 +455,7 @@ struct ContentView_Previews: PreviewProvider {
 
 另一种选择是从视图中提取逻辑，然后针对它编写单元测试。这在下面的实现中显示：
 
-```
+``` swift
 struct ProductFilterForm {
     
     var min: Double?
@@ -475,7 +475,7 @@ struct ProductFilterForm {
 
 `ProductFilterForm` 现在可以单独进行单元测试。单元测试如下所示：
 
-```
+``` swift
 
 func test_user_can_filter_products_by_price() throws {
         
@@ -516,7 +516,7 @@ func test_user_can_filter_products_by_price() throws {
 
 下面是上述方案的 E2E 测试的实现。
 
-```
+``` swift
   func test_user_can_filter_products_based_on_price() {
         
         let app = XCUIApplication()
@@ -577,7 +577,7 @@ func test_user_can_filter_products_by_price() throws {
 
 考虑一个简单的 `LoginScreen` 视图，其中包含用户名和密码文本字段。如果我们想仅在视图正确验证时才启用登录按钮，我们可以使用以下实现：
 
-```
+``` swift
 struct LoginScreen: View {
     
     @State private var username: String = ""
@@ -603,7 +603,7 @@ struct LoginScreen: View {
 
 如果您正在处理更复杂的表单，则建议将其提取到自己的结构中。此概念显示在下面的实现中。
 
-```
+``` swift
 struct LoginFormConfig {
     
     var username: String = ""
@@ -632,7 +632,7 @@ struct LoginScreen: View {
 
 `LoginFormConfig` 封装表单验证。这也允许我们针对 LoginFormConfig 编写单元测试。下面显示了几个单元测试：
 
-```
+``` swift
 final class LearnTests: XCTestCase {
 
     func test_login_form_validates_successfully() {
@@ -673,7 +673,7 @@ final class LearnTests: XCTestCase {
 
 我们可以从创建一个 ErrorWrapper 开始，它将负责包装实际错误，并为用户提供后续步骤的指导。
 
-```
+``` swift
 struct ErrorWrapper: Identifiable {
     let id = UUID()
     let error: Error
@@ -683,7 +683,7 @@ struct ErrorWrapper: Identifiable {
 
 ErrorWrapper 将由 ErrorView 使用。ErrorView将负责以可视格式显示错误的详细信息。您可以在下面找到错误视图的基本实现。
 
-```
+``` swift
 struct ErrorView: View {
     
     let errorWrapper: ErrorWrapper
@@ -705,7 +705,7 @@ struct ErrorView: View {
 
 为了从应用程序的任何部分设置错误包装器，我们将添加一个 ErrorState 作为 ObservableObject 并将其注入到环境对象中。
 
-```
+``` swift
 class ErrorState: ObservableObject {
     @Published var errorWrapper: ErrorWrapper?
 }
@@ -738,7 +738,7 @@ struct StoreApp: App {
 
 考虑一个 `ReminderCellView` ，它允许用户执行检查/取消选中和删除操作。实现如下所示：
 
-```
+``` swift
 struct ReminderCellView: View {
     
     let index: Int
@@ -765,7 +765,7 @@ struct ReminderCellView: View {
 `ReminderCellView` 公开了 `onChecked` 和 `onDelete` 闭包。调用者可以使用这些闭包来执行特定任务。调用方如下:
 
 
-```
+``` swift
 struct ContentView: View {
 
     var body: some View {
@@ -784,7 +784,7 @@ struct ContentView: View {
 
 我们可以将所有事件分组到一个简单的枚举中来解决此问题。如下所示：
 
-```
+``` swift
 enum ReminderCellEvents {
     case onChecked(Int)
     case onDelete(Int)
@@ -793,7 +793,7 @@ enum ReminderCellEvents {
 
 可以使用`ReminderCellEvents`来对`ReminderCellView`进行操作和更新，如下：
 
-```
+``` swift
 struct ReminderCellView: View {
     
     let index: Int
@@ -818,7 +818,7 @@ struct ReminderCellView: View {
 
 现在，我们不再处理多个闭包，而是只处理单个基于枚举的事件结构。调用站点看起来也干净得多。
 
-```
+``` swift
 struct ContentView: View {
 
     var body: some View {
@@ -845,7 +845,7 @@ SwiftUI 在 iOS 16 中引入了 NavigationStack，它允许开发人员为其应
 
 在 SwiftUI 中，有几种不同的方法可以处理路由。一种可能的方法是处理应用程序根视图中的所有路由。我们将从创建路由枚举开始，它将为整个应用程序设置路由。实现如下所示：
 
-```
+``` swift
 
 enum Routes: Hashable {
     case catalog(CatalogRoutes)
@@ -868,7 +868,7 @@ enum Routes: Hashable {
 
 对于编程路由，我们添加了 `NavigationState`。 NavigationState 跟踪所有路线，并将通过 `@EnvironmentObject` 注入到应用程序中
 
-```
+``` swift
 class NavigationState: ObservableObject {
     @Published var routes: [Routes] = []
 }
@@ -876,7 +876,7 @@ class NavigationState: ObservableObject {
 
 最后，我们在应用程序的根视图中处理所有路由。如下所示：
 
-```
+``` swift
 @main
 struct LearnApp: App {
     
@@ -915,7 +915,7 @@ struct LearnApp: App {
 
 上述方法可行，但很快就会变得混乱，因为我们将应用程序的所有路由都放在一个地方。控制这个问题的一种方法是为屏幕的每个部分创建单独的路由器，并允许路由器处理特定的路由行为。`CatalogRouter`的实现如下所示。CatalogRouter负责处理与目录屏幕相关的所有路由。
 
-```
+``` swift
 struct CatalogRouter {
     
     let routes: CatalogRoutes
@@ -932,7 +932,7 @@ struct CatalogRouter {
 
 同样，我们可以为清单添加路由器。
 
-```
+``` swift
 struct InventoryRouter {
     let routes: InventoryRoutes
     
@@ -951,7 +951,7 @@ struct InventoryRouter {
 
 现在，我们的导航目的地看起来更干净。
 
-```
+``` swift
 @main
 struct LearnApp: App {
     
@@ -977,7 +977,7 @@ struct LearnApp: App {
 
 如果需要调用某个路由，可以在 `NavigationState` 中附加该路由。这在下面的实现中显示：
 
-```
+``` swift
 struct ContentView: View {
     
     @EnvironmentObject private var navigationState: NavigationState
@@ -1042,7 +1042,7 @@ struct ContentView: View {
 
 完整的应用可能类似于下面的实现：
 
-```
+``` swift
 class Webservice {
     
     func fetchProducts() async throws -> [Product] {
@@ -1107,7 +1107,7 @@ struct ProductListScreen: View {
 
 在下面的代码中，我们引入了一个WebserviceProtocol。Web服务和新创建的模拟Web服务都符合Webservice协议，如下所示：
 
-```
+``` swift
 protocol WebserviceProtocol {
     func fetchProducts() async throws -> [Product]
 }
@@ -1133,7 +1133,7 @@ class MockedWebService: WebserviceProtocol {
 
 Web 服务现在作为依赖项注入到我们的 ProductListViewModel。如下所示：
 
-```
+``` swift
 class ProductListViewModel: ObservableObject {
     
     private let webservice: WebserviceProtocol
@@ -1157,7 +1157,7 @@ class ProductListViewModel: ObservableObject {
 
 `ProductListScreen`视图也会更新以反映更改。
 
-```
+``` swift
 struct ProductListScreen: View {
     
     @StateObject private var vm = ProductListViewModel(webservice: WebserviceFactory.create())
@@ -1176,7 +1176,7 @@ struct ProductListScreen: View {
 > 
 现在，让我们继续检查测试。
 
-```
+``` swift
 final class ProductsTests: XCTestCase {
     
     func test_populate_products() async throws {
@@ -1200,7 +1200,7 @@ final class ProductsTests: XCTestCase {
 
 上述测试的问题在于它不是测试行为，而是测试实现。以下代码行是实现详细信息。
 
-```
+``` swift
 verify(mockedWebService.fetchProducts()).wasCalled()
 ```
 
@@ -1223,7 +1223,7 @@ verify(mockedWebService.fetchProducts()).wasCalled()
 
 除了单元测试和集成测试之外，端到端测试最适合防止回归。一个好的端到端将测试一个完整的故事/行为。您可以在下面找到端到端测试的实现。
 
-```
+``` swift
 final class ProductTests: XCTestCase {
     
     private var webservice: Webservice!
@@ -1285,7 +1285,7 @@ E2E 测试比本节前面讨论的前面的测试慢，但它们较慢的主要�
 
 让我们查看用于用户登录操作的网络服务的示例集成测试。
 
-```
+``` swift
 // This test is generated by ChatGPT AI 
 import XCTest
 
@@ -1334,7 +1334,7 @@ class IntegrationTests: XCTestCase {
 
 > > 请记住，在实际场景中，银行帐户不是作为计算器实现的。银行帐户记录在分类帐中，其中保留了所有财务交易。
 
-```
+``` swift
 class BankAccount {
     
     private(set) var balance: Double
@@ -1356,7 +1356,7 @@ class BankAccount {
 
 银行账户的一个可能的测试是检查账户是否成功存款。
 
-```
+``` swift
 final class BankAccountTests: XCTestCase {
     
     func test_deposit_amount() {
@@ -1391,7 +1391,7 @@ final class BankAccountTests: XCTestCase {
 
 某些框架还允许您构造内存数据库。例如，Core Data 默认使用 SQLite，但可以将其配置为使用内存数据库，如下所示：
 
-```
+``` swift
 storeDescription.type = NSInMemoryStoreType
 ```
 
@@ -1413,7 +1413,7 @@ storeDescription.type = NSInMemoryStoreType
 
 让我们举一个非常简单的构建计数器应用程序的示例。
 
-```
+``` swift
 class CounterViewModel: ObservableObject {
     
     @Published var count: Int = 0
@@ -1442,7 +1442,7 @@ struct ContentView: View {
 
 为了测试计数是否递增并显示在屏幕上，编写了以下单元测试。
 
-```
+``` swift
 import XCTest
 @testable import Learn
 
@@ -1463,7 +1463,7 @@ final class LearnTests: XCTestCase {
 
 验证用户界面是否按预期工作的更好方法是实现 UI 测试。看看下面的实现。
 
-```
+``` swift
 final class LearnUITests: XCTestCase {
 
     func testExample() throws {
