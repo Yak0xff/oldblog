@@ -1,7 +1,7 @@
 ---
 layout: post
 author: Yak
-title: 使用 SwiftUI 构建大型应用程序---模块化架构指南
+title: 使用 SwiftUI 构建大型应用程序---模块化架构指南【译】
 tags: 
 - SwiftUI
 feature: true
@@ -10,47 +10,45 @@ categories:
 cover: https://raw.githubusercontent.com/zycslog/assets-pro/main/fotis-fotopoulos-SyvsTmuuZyM-unsplash.jpg
 ---
 
-软件架构始终是一个热门争论的话题，特别是当有这么多不同的选择时。在过去的 8-12 个月里，作者一直在尝试使用 MV 模式来构建客户端/服务器应用程序，并在我最初的文章中写到了这一点 [SwiftUI 架构 - MV 模式方法的完整指南](https://azamsharp.com/2022/10/06/practical-mv-pattern-crud.html)。在本文中，作者将讨论如何将 MV 模式应用于构建大型客户端/服务器应用程序。从SwiftUI本身的设计模式触发，探索SwiftUI在大型应用程序中如何使用MV模式来构建，以及其合理性等，很值得一读。
+软件架构始终是一个热门争论的话题，特别是当有这么多不同的选择时。在过去的 8-12 个月里，作者一直在尝试使用 MV 模式来构建客户端/服务器应用程序，并在作者最初的文章中写到了这一点 [SwiftUI 架构 - MV 模式方法的完整指南](https://azamsharp.com/2022/10/06/practical-mv-pattern-crud.html)。在本文中，作者将讨论如何将 MV 模式应用于构建大型客户端/服务器应用程序。从SwiftUI本身的设计模式触发，探索SwiftUI在大型应用程序中如何使用MV模式来构建，以及其合理性等，很值得一读。
 
---- 
+> 架构与模式的选择取决于要构建的应用程序的类型。没有哪一种架构适用于所有的项目方案。选择合适你应用程序需求的，才是最佳的架构。
 
-Software architecture is always a topic for hot debate, specially when there are so many different choices. For the last 8-12 months, I have been experimenting with MV pattern to build client/server apps and wrote about it in my original article [SwiftUI Architecture - A Complete Guide to MV Pattern Approach](https://azamsharp.com/2022/10/06/practical-mv-pattern-crud.html). In this article, I will discuss how MV pattern can be applied to build large scale client/server applications.
+本文大纲：
 
-> Architecture and patterns depends on the type of application you are building. No single architecture will work in all scenarios. Choose the best architecture suitable for your application needs.
+- 模块化架构
+- 理解MV模式
+- 屏幕与视图
+- 多个聚合模型
+- 视图的特定逻辑
+- 验证
+- 路由
+- 分组视图与事件
+- 测试
 
-The outline of this article is shown below:
+## 模块化架构
 
--   Modular Architecture
--   Understanding the MV Pattern
--   Screens vs Views
--   Multiple Aggregate Models
--   View Specific Logic
--   Validation
--   Navigation
--   Grouping View Events
--   Testing
+软件中的模块化架构是指将软件系统设计和组织成小型、自包含的模块或组件。这些模块可以独立地进行测试和维护。每个模块都有一个特定的目的，解决一个特定的业务需求。
 
-## Modular Architecture
+模块化架构在处理由多个团队组成的大型项目时也具有优势。每个团队都可以处理特定的模块，而不会相互干扰。
 
-Modular architecture in software refers to the design and organization of software systems into small, self contained modules or components. These modules can be tested and maintained independently of one another. Each module serves a specific purpose and solve a specific business requirement.
+> 如果您正在处理将由其他团队使用或使用的模块，请确保您正在与他们通信，而不是完全孤立地创建模块。软件开发中存在许多问题仅仅是因为团队之间缺乏沟通。
 
-Modular architecture also provides advantages when working on large projects consisting of multiple teams. Each team can work on a particular module, without interfering with each other.
+模块化可以通过几种不同的方式实现。您可以将每个模块公开为包 （SPM），该包可以导入到不同的应用程序中。模块化也可以通过基于特定的分组或文件夹结构来构建应用来实现。请记住，在使用文件夹进行模块化时，您必须特别注意关注点分离和单一责任原则。
 
-> If you are working on a module that will be consumed or used by other teams then make sure that you are communicating with them and not creating the module in complete isolation. A lot of problems in software development exists solely because of lack of communication between teams.
+> 本文的重点不是 Swift 包管理器，而是如何通过基于应用程序的边界上下文中断应用程序来实现模块化。**Swift Package Manager 可用于将这些依赖项打包到可重用的模块中。**
 
-Modularity can be achieved in several different ways. You can expose each module as a package (SPM), which can be imported into different applications. Modularity can also be achieved by structuring your app based on specific grouping or folder structure. Keep in mind that when using folders for modularity you have to pay special attention to separation of concerns and single responsibility principles.
 
-> The focus of this article is not Swift Package Manager, but how to achieve modularity by breaking the app based on the bounded context of the application. **Swift Package Manager can be used to package those dependencies into reusable modules.**
+## 理解MV模式
 
-## Understanding the MV Pattern
+MV 模式背后的主要思想是允许视图直接与模型对话。这消除了为每个视图创建不必要的视图模型的需要，这只会增加项目的大小，但不提供任何其他好处。
 
-The main idea behind the MV Pattern is to allow views directly talk to the model. This eliminates the need for creating unnecessary view models for each view, which simply contribute to the size of the project but does not provide any additional benefits.
+> MV 模式不主张将所有逻辑都放在视图中。该特定模式称为 [容器模式](https://www.patterns.dev/posts/presentational-container-pattern/) .我也在我的博客上谈到过它。你可以在[这里](https://azamsharp.com/2023/01/24/introduction-to-container-pattern.html)阅读它。
+> 
+关于 SwiftUI 最令人困惑的事情之一是视图。我不怪你，我认为它们不应该被称为观点。它们应该被称为Widgets（Flutter）或Components（React）。SwiftUI 中的视图与传统的 UIKit 视图不同。它们只是您想要在屏幕上显示的内容的声明。
 
-> MV Pattern does not advocate putting all the logic in view. That particular pattern is known as [Container Pattern](https://www.patterns.dev/posts/presentational-container-pattern/). I have also talked about it on my blog. You can read about it [here](https://azamsharp.com/2023/01/24/introduction-to-container-pattern.html).
+SwiftUI 中的视图让我想起了 ReactJS JSX 语法。让我们看一个非常小的例子。
 
-One of the most confusing things about SwiftUI are the views. I don’t blame you, I don’t think they should be called views. They should have been called Widgets (Flutter) or Components (React). The views in SwiftUI are not like traditional UIKit views. They are just the declaration of what you want to be displayed on the screen.
-
-The views in SwiftUI, reminds me of ReactJS JSX syntax. Let’s take a look at a very small example.
 
 ```
 function App() {
@@ -63,41 +61,45 @@ function App() {
 }
 ```
 
-In the above ReactJS code, we have created a functional component called `App`. The App component returns a `<div>` element containing a `<h1>` and `<button>`. The thing to notice here is that those are not actual HTML elements. Those are virtual DOM (Document Object Model) elements managed by React framework. The main reason is that React needs to track changes to those elements so it can only render, what has changed. Once React finds out the changed elements using the diffing process, those virtual DOM elements are used to render real HTML elements on the screen.
+在上面的 ReactJS 代码中，我们创建了一个名为 `App` 的功能组件。App 组件返回一个包含 `<h1>` 和 `<button>` 的 `<div>` 元素。这里要注意的是，这些不是实际的HTML元素。这些是由 React 框架管理的虚拟 DOM（文档对象模型）元素。主要原因是 React 需要跟踪这些元素的更改，因此它只能渲染已更改的内容。一旦 React 使用差异过程找到更改的元素，这些虚拟 DOM 元素就会用于在屏幕上渲染真实的 HTML 元素。
 
-I believe SwiftUI uses the same concepts internally. The views in the body property are not actual views but the declaration of views. Eventually, those views gets converted to real views and then displayed on the screen. John Sundell also talked about it in his article [SwiftUI views versus modifiers](https://www.swiftbysundell.com/articles/swiftui-views-versus-modifiers/).
+我相信 SwiftUI 在内部使用相同的概念。body 属性中的视图不是实际视图，而是视图的声明。最终，这些视图被转换为真实视图，然后显示在屏幕上。John Sundell 在他的文章 [SwiftUI 视图与修饰符](https://www.swiftbysundell.com/articles/swiftui-views-versus-modifiers/)中也谈到了这一点。
 
-If you are interested in learning more about the concept of virtual DOM then check out this talk title [Tom Occhino and Jordan Walke: JS Apps at Facebook](https://youtu.be/GW0rj4sNH2w?t=301). This is the talk, where Facebook introduced ReactJS to the public.
+如果您有兴趣了解有关虚拟DOM概念的更多信息，请查看此演讲标题 [Tom Occhino and Jordan Walke：Facebook上的JS应用程序](https://youtu.be/GW0rj4sNH2w?t=301)。这是Facebook向公众介绍ReactJS的演讲。
 
-Apple also talks about it in their article [Model data](https://developer.apple.com/documentation/swiftui/model-data) published on SwiftUI official documentation page.
 
-Ok now back to the MV pattern!
+苹果在SwiftUI官方文档页面上发布的文章[模型数据](https://developer.apple.com/documentation/swiftui/model-data)中也谈到了这一点。
 
-In WWDC 2020 talk titled [Data Essentials in SwiftUI](https://developer.apple.com/videos/play/wwdc2020/10040/) Apple presented the following diagram.
+好的，现在回到MV模式！
+
+在 WWDC 2020 中，题为[SwiftUI 中的数据要点](https://developer.apple.com/videos/play/wwdc2020/10040/)的演讲中，Apple 展示了下图。
+
+
 
 ![ObservableObject as the data dependency surface](https://azamsharp.com/images/single-source.png)
 
-The main idea is to provide view access to a single layer or surface that serves as the source of truth and allows access to all entities within the application.
+主要思想是提供对单个层或表面的视图访问，该层或表面用作事实来源，并允许访问应用程序中的所有实体。
 
-Apple sample projects, which includes [Fruta](https://developer.apple.com/documentation/swiftui/fruta_building_a_feature-rich_app_with_swiftui) and [FoodTruck](https://developer.apple.com/documentation/swiftui/food_truck_building_a_swiftui_multiplatform_app) applications demonstrated how to use this pattern against a hard-coded data source. But in WWDC video title **“[Use Xcode for server-side development](https://developer.apple.com/videos/play/wwdc2022/110360/)“** Apple showed how to update the existing FoodTruck app and consume the data from an API response.
+Apple 示例项目（包括 [Fruta](https://developer.apple.com/documentation/swiftui/fruta_building_a_feature-rich_app_with_swiftui) 和 [FoodTruck 应用程序](https://developer.apple.com/documentation/swiftui/food_truck_building_a_swiftui_multiplatform_app)）演示了如何针对硬编码数据源使用此模式。但是在WWDC视频标题 [使用Xcode进行服务器端开发](https://developer.apple.com/videos/play/wwdc2022/110360/)中，Apple展示了如何更新现有的FoodTruck应用程序并使用API响应中的数据。
 
-The screenshot below shows `FoodTruckModel` using the `DonutsServerClient` to retrieve list of donuts. DonutsServerClient is responsible for making an actual request to the server and downloading the donuts. Once the donuts are downloaded they are assigned to the serverDonuts property maintained by the FoodTruckModel.
+下面的屏幕截图显示了 `FoodTruckModel` 使用 `DonutsServerClient` 检索甜甜圈列表。甜甜圈服务器客户端负责向服务器发出实际请求并下载甜甜圈。下载甜甜圈后，它们将被分配给由FoodTruckModel维护的serverDonuts属性。
 
 ![Use Xcode for server-side development](https://azamsharp.com/images/xcode-server.png)
 
-[Use Xcode for server-side development](https://developer.apple.com/videos/play/wwdc2022/110360/)
+[使用 Xcode 进行服务器端开发](https://developer.apple.com/videos/play/wwdc2022/110360/)
 
-Here is the updated diagram to support the networking layer.
+下面是支持网络层的更新图。
 
 ![Aggregate Root](https://azamsharp.com/images/aggregate-model-updated.001.jpeg)
 
-> I know what you are thinking. Are we going to take advice based on Apple’s code samples blindly? No! Never take any advice blindly. Always invest time and research and weigh the advantages and disadvantages of each approach. I have evaluated many different techniques and patterns and found this to be the best and simplest option when building client/server apps using SwiftUI. **Do your research!**.
+> 我知道你在想什么。我们会盲目地根据Apple的代码示例提出建议吗？不！永远不要盲目地接受任何建议。始终投入时间和研究，并权衡每种方法的优缺点。我评估了许多不同的技术和模式，发现这是使用 SwiftUI 构建客户端/服务器应用程序时最好和最简单的选择。**供你的探究！**
 
-Based on Apple’s recommendation in their WWDC videos and code samples and my own personal experience, I have been implementing a single aggregate model, which holds the entire state of the application. For small and medium sized apps, a single aggregate model might be enough. For complicated apps, you can have multiple aggregate models which will group related entities together. Multiple aggregate models are discussed later in this article.
+根据 Apple 在他们的 WWDC 视频和代码示例中的建议以及我自己的个人经验，我一直在实现一个聚合模型，该模型保存应用程序的整个状态。对于中小型应用，单个聚合模型可能就足够了。对于复杂的应用，可以有多个聚合模型，这些模型会将相关实体组合在一起。本文稍后将讨论多个聚合模型。
 
-> Once again keep in mind that this article is about client/server apps. If you are using Core Data or anything else then you will have to do your research. For purely Core Data apps, I have been experimenting with Active Record Pattern. You can read about it [here](https://azamsharp.com/2023/01/30/active-record-pattern-swiftui-core-data.html).
+> 再次记住，本文是关于客户端/服务器应用程序的。如果您正在使用核心数据或其他任何东西，那么您将不得不进行研究。对于纯粹的核心数据应用程序，我一直在尝试活动记录模式。你可以在[这里](https://azamsharp.com/2023/01/30/active-record-pattern-swiftui-core-data.html)阅读它。
 
-Following the pattern discussed in [Use Xcode for server-side development](https://developer.apple.com/videos/play/wwdc2022/110360/) talk, here is the StoreModel I have implemented for my application.
+
+按照[使用 Xcode 进行服务器端开发](https://developer.apple.com/videos/play/wwdc2022/110360/)讲座中讨论的模式，下面是我为我的应用程序实现的 StoreModel。
 
 ```
 class StoreModel: ObservableObject {
@@ -120,12 +122,13 @@ class StoreModel: ObservableObject {
     }
 }
 ```
+`StoreModel` 是一个聚合模型，用于集中应用程序的所有数据。视图直接与 StoreModel 通信以执行查询和暂留操作。StoreModel 也利用 `StoreHTTPClient` ，它用于执行网络操作。StoreHTTPClient 是一个无状态网络层。这意味着它可以用于应用程序的其他部分，而不是SwiftUI，即UIKit，甚至可以在不同的平台（macOS）上使用。
 
-`StoreModel` is an aggregate model that centralizes all the data for the application. Views communicate directly with the StoreModel to perform queries and persistence operations. StoreModel also utilizes `StoreHTTPClient`, which is used to perform network operations. StoreHTTPClient is a stateless network layer. This means it can be used in other parts of the application that are not SwiftUI, meaning UIKit or even on a different platform (macOS).
+> 在域驱动设计 （DDD） 中，聚合是相关对象的群集，出于数据一致性和事务边界的目的，这些对象被视为单个工作单元。因此，聚合模型是代码中聚合的表示形式，通常为类或类组。
 
-> In Domain-Driven Design (DDD), an aggregate is a cluster of related objects that are treated as a single unit of work for the purpose of data consistency and transactional boundaries. An aggregate model, then, is a representation of an aggregate in code, typically as a class or group of classes.
 
-StoreModel can be used in a variety of different ways. You can use StoreModel as a @StateObject if you only want the data available to a particular view and if you want to tie the object with the lifetime of the view. But quite often I find myself adding StoreModel to @EnvironmentObject so that it can be available in the injected view and all of its sub views.
+`StoreModel` 可以以各种不同的方式使用。如果只希望数据可用于特定视图，并且希望将对象与视图的生存期相关联，则可以使用 StoreModel 作为@StateObject。但是我经常发现自己将 StoreModel 添加到@EnvironmentObject，以便它可以在注入的视图及其所有子视图中可用。
+
 
 ```
 @main
@@ -140,7 +143,8 @@ struct StoreAppApp: App {
 }
 ```
 
-After the StoreModel is injected through the @EnvironmentObject, you can access the `StoreModel` as shown in the implementation below.
+通过@EnvironmentObject注入 StoreModel 后，可以访问 `StoreModel` ，如下面的实现所示。
+
 
 ```
 struct ContentView: View {
@@ -160,44 +164,46 @@ struct ContentView: View {
 }
 ```
 
-> You might be tempted to use `@EnvironmentObject` inside all the views. Although, it will work as expected but for larger applications you need to make presentation views free of any dependencies. Presentation views are usually child views that are created for the purpose of reusability. It you try to access `@EnvironmentObject` inside the child views then it effects their reusability status and they become less useful. The main reason is that now they are dependent on the `@EnvironmentObject` to provide data to them. Instead we should follow the top-down approach, where the data is passed from the parent view to the child view. This is also known as the [Container/Presentation pattern](https://www.patterns.dev/posts/presentational-container-pattern/).
+> 您可能想在所有视图中使用 `@EnvironmentObject` 。虽然，它将按预期工作，但对于较大的应用程序，您需要使演示视图没有任何依赖项。表示视图通常是为实现可重用性而创建的子视图。如果您尝试访问子视图中的 `@EnvironmentObject` ，则会影响它们的可重用性状态，并且它们变得不那么有用。主要原因是现在他们依赖于 `@EnvironmentObject` 向他们提供数据。相反，我们应该遵循自上而下的方法，其中数据从父视图传递到子视图。这也称为[容器/表示模式](https://www.patterns.dev/posts/presentational-container-pattern/)。
 
-Apart from fetching and persistence, StoreModel can also provide sorting, filtering, searching and other operations directly to the view.
+除了获取和持久化之外，StoreModel 还可以直接对视图提供排序、过滤、搜索和其他操作。
 
-> If I was using the traditional MVVM pattern then I would create several view models to accommodate each screen. This can include `ProductListViewModel`, `ProductViewModel`, `AddProductViewModel`, `ProductDetailViewModel` and many more. Most of the time, these view models end up with one or two functions and maintaining a single source of truth can become very hard. In MV pattern, the view itself is the view model so we don’t need to create unnecessary view models for most of the time. The view, which is also a view model is simply going to ask model (Aggregate Model) for the data.
 
-**The source of truth in a client/server application is the server.**. This means you should not be adding view models conforming to ObservableObject (new source of truth) protocol just because you added a new view. The source of truth for that view has not changed, it is still the server.
+> 如果我使用传统的 MVVM 模式，那么我将创建多个视图模型来适应每个屏幕。这可以包括 `ProductListViewModel` 、 `ProductViewModel` 、 `AddProductViewModel` 、 `ProductDetailViewModel` 等等。大多数时候，这些视图模型最终只有一个或两个函数，维护单一事实来源可能会变得非常困难。在 MV 模式中，视图本身就是视图模型，因此我们在大多数情况下不需要创建不必要的视图模型。视图也是一个视图模型，它只是向模型（聚合模型）请求数据。
 
-A single StoreModel is ideal for small or even medium sized apps. But for larger apps it will be a good idea to introduce multiple aggregate models based on the bounded context of the application. In the next section, we will cover multiple aggregate models and how they benefit when working in large teams.
 
-## Multiple Aggregate Models
+**客户端/服务器应用程序中的事实来源是服务器**。这意味着您不应该仅仅因为添加了新视图而添加符合 ObservableObject（新事实来源）协议的视图模型。该视图的真相来源没有改变，它仍然是服务器。
 
-As you learned in the previous section, the purpose of an aggregate model is to expose data to your view. As Luca explained in [Data Essentials in SwiftUI WWDC 2020 (11:30)](https://developer.apple.com/videos/play/wwdc2020/10040/) “The aggregate model is an `ObservableObject`, which acts as your data dependency surface. This allows us to model the data using value type and manage its life cycle and side effects with a reference type.”
+单个StoreModel非常适合小型甚至中型应用程序。但对于较大的应用，最好根据应用程序的边界上下文引入多个聚合模型。在下一节中，我们将介绍多个聚合模型，以及它们在大型团队中工作时如何受益。
 
-As your business grows, a single aggregate model might not be enough to maintain the life cycle and side effects of an entire application. This is where we will introduce multiple aggregate models. These aggregate models are based on the bounded context of the application. Bounded context refers to a specific area of the system that has clear boundaries and is designed to serve a particular business purpose.
+## 多个聚合模型
 
-In an e-commerce application, we can have several bounded contexts including checkout process, inventory management system, catalog, fulfillment, shipment, ordering, marketing and customer management modules.
+正如您在前面的部分所学到的，聚合模型的目的是将数据暴露给视图。正如Luca在[Data Essentials in SwiftUI WWDC 2020 (11:30)](https://developer.apple.com/videos/play/wwdc2020/10040/)中所解释的，“聚合模型是一种`ObservableObject`，它充当您数据依赖关系的表面。这使我们能够使用值类型对数据进行建模，并使用引用类型管理其生命周期和副作用。”
 
-Defining bounded context is important in software development and it helps to break down the application into small manageable pieces. This also allows teams to work on different parts of the system without interfering with each other.
+随着业务的增长，单个聚合模型可能不足以维护整个应用程序的生命周期和副作用。在这里，我们将介绍多个聚合模型。这些聚合模型基于应用程序的边界上下文。边界上下文是指系统中具有明确边界并旨在服务于特定业务目的的特定区域。
 
-Developers are usually not good in finding bounded context for software applications. The main reason is that their technical knowledge does not directly map to domain knowledge. Domain knowledge requires different set of skills and a domain expert is a better suited for this kind of role. A domain expert is a person, who may not be tech savvy but understands how the business or a particular domain works. In large projects, you may have multiple domain experts, each handling a different business domain. This is why it is extremely important for developers to communicate with domain experts and understand the domain before starting any development.
+在电子商务应用程序中，我们可以有多个边界上下文，包括结帐流程、库存管理系统、目录、履行、装运、订购、营销和客户管理模块。
 
-Once, you have identified different bounded contexts associated with your application you can represent them in the form of aggregate models. This is shown in the diagram below.
+定义边界上下文在软件开发中非常重要，它有助于将应用程序分解为可管理的小部分。这也允许团队在系统的不同部分工作，而不会相互干扰。
+
+开发人员通常不擅长为软件应用程序查找边界上下文。主要原因是他们的技术知识没有直接映射到领域知识。领域知识需要不同的技能，领域专家更适合这种角色。领域专家是一个人，他可能不精通技术，但了解业务或特定领域的运作方式。在大型项目中，您可能有多个领域专家，每个专家处理不同的业务领域。这就是为什么开发人员在开始任何开发之前与领域专家沟通并了解领域非常重要的原因。
+
+确定与应用程序关联的不同边界上下文后，可以以聚合模型的形式表示它们。如下图所示。
 
 ![Multiple Aggregate Root](https://azamsharp.com/images/aggregate-model-updated.002.jpeg)
 
-The network layer can also be divided into multiple HTTP clients or you can use a single generic network layer for your entire application. This is shown in the following diagram.
+网络层也可以划分为多个 HTTP 客户端，或者您可以对整个应用程序使用单个通用网络层。如下图所示。
 
 ![Multiple Aggregate Root](https://azamsharp.com/images/aggregate-model-updated.003.jpeg)
 
-The Catalog aggregate model will be responsible for providing views with all the entities associated with Catalog. This can include but not limited to:
+目录聚合模型将负责提供与目录关联的所有实体的视图。这可能包括但不限于：
 
 -   Product
 -   Category
 -   Brand
 -   Review
 
-The Ordering aggregate model will be responsible for providing views with all the ordering related entities. This can include but not limited to:
+排序聚合模型将负责提供所有排序相关实体的视图。这可能包括但不限于：
 
 -   Order
 -   OrderLineItem
@@ -205,9 +211,9 @@ The Ordering aggregate model will be responsible for providing views with all th
 -   ShippingMethod
 -   Discount
 
-The `Catalog` and `Ordering` aggregate models will be reference types conforming to `ObservableObject` protocol. And all the entities they provide will be value types.
+`目录`和`订购`聚合模型将是符合`ObservableObject`协议的引用类型。它们提供的所有实体都将是值类型。
 
-The outline of `Catalog` aggregate model and `Product` entity is shown below:
+`Catalog`聚合模型和`Product`实体的概要如下所示:
 
 ```
 
@@ -251,7 +257,8 @@ class Catalog: ObservableObject {
 }
 ```
 
-Catalog and Ordering aggregate models are injected into the application as an environment object. You can inject them directly in your application root view or the root view of each section of the application. The later is shown below:
+目录和订单聚合模型作为环境对象注入到应用程序中。可以直接在应用程序根视图或应用程序每个部分的根视图中注入它们。后者如下所示：
+
 
 ```
 @main
@@ -268,7 +275,8 @@ struct StoreApp: App {
 }
 ```
 
-Now, inside a view you can use Catalog or Ordering models by accessing it through `@EnvironmentObject`. The implementation is shown below:
+现在，在视图中，您可以通过访问`@EnvironmentObject`来使用Catalog或Ordering模型。具体实现如下所示：
+
 
 ```
 struct CatalogListScreen: View {
@@ -288,8 +296,7 @@ struct CatalogListScreen: View {
     }
 }
 ```
-
-If your view needs to access ordering information then it can utilize the Ordering aggregate model too.
+如果您的视图需要访问订单信息，那么它也可以利用排序聚合模型。
 
 ```
 struct AdminDashboardScreen: View {
@@ -317,45 +324,51 @@ struct AdminDashboardScreen: View {
 }
 ```
 
-There are scenarios when your aggregate model will need to access information from another aggregate model. In those cases, your aggregate model will simply use the network service to fetch the information that is needs.
+在某些情况下，聚合模型需要访问另一个聚合模型中的信息。在这些情况下，聚合模型将仅使用网络服务来获取所需的信息。
 
-> It is important that your caching layer is called from within the network layer and not from aggregate models. This will allow aggregate models to take advantage of caching through the network layer, instead of implementing it on their own. By accessing caching layer from inside the network layer, all your aggregate models can benefit from faster response through the use of cached resources.
 
-> As mentioned earlier for small or even medium sized apps, you may only need a single aggregate model. For larger apps you can introduce new aggregate models. Make sure to consult with a domain expert before creating application boundaries.
+> 重要的是，缓存层是从网络层内部调用的，而不是从聚合模型中调用的。这将允许聚合模型利用通过网络层的缓存，而不是自行实现它。通过从网络层内部访问缓存层，所有聚合模型都可以通过使用缓存资源从更快的响应中受益。
 
-The concept of domain boundaries can also be applied to user interfaces. This allows us to reuse user interface elements in other applications.
+> 如前所述，对于小型甚至中型应用，可能只需要一个聚合模型。对于较大的应用，可以引入新的聚合模型。在创建应用程序边界之前，请确保咨询领域专家。
+
+域边界的概念也可以应用于用户界面。这使我们能够在其他应用程序中重用用户界面元素。
+
 
 ![Factor out common pieces](https://azamsharp.com/images/user-interface.png)
 
--   Permission has been granted from the original author of the image to use it in this article.
+:::tip 图片的原作者已授予在本文中使用它的许可。
+:::
 
-> You can factor out common interface elements using Swift Package Manager and import those packages into other applications.
+> 您可以使用 Swift 包管理器分解出常见的界面元素，并将这些包导入到其他应用程序中。
 
-Let’s go ahead and zoom out and see how our architecture looks like with all the pieces in place.
+让我们继续缩小，看看我们的架构在所有部分都到位后的样子。
 
 ![Architecture](https://azamsharp.com/images/architecture-model-updated.jpeg)
 
--   This image has been updated and the permission has been granted from the original author of the image to use it in this article.
+:::tip 此图像已更新，并且已从图像的原始作者授予在本文中使用它的权限。
+:::
 
-As discussed earlier, each bounded context is represented by its own module. These modules can be represented by a folder or a package dependency.
+如前所述，每个边界上下文都由其自己的模块表示。这些模块可以由文件夹或包依赖项表示。
 
-**CatalogUI:** Represents user interface associated with catalog. This can include all the catalog specific stuff like AddCatalogScreen, UpdateCatalogScreen etc.
 
-**Catalog:** Represents the models associated with catalog. This will contain the aggregate model and all the entities exposed by the aggregate model.
+**CatalogUI:** 表示与目录关联的用户界面。这可以包括所有特定于目录的内容，如AddCatalogScreen，UpdateCatalogScreen等。
 
-**MyStoreKit**: Represents the HTTP client for performing network calls.
+**Catalog:** 表示与目录关联的模型。这将包含聚合模型和聚合模型公开的所有实体。
 
-**Foundation Core**: Represents resources used by all modules. This can include helper classes/structs, reusable views, images, icons and even preview content used for testing.
+**MyStoreKit**: 表示用于执行网络调用的 HTTP 客户端。
 
-> Each module like Shipping, Inventory, Ordering etc can be represented by a folder structure or a package dependency. This really depends on your needs and if you wish to reuse your modules in other projects.
+**Foundation Core**: 表示所有模块使用的资源。这可以包括帮助程序类/结构、可重用视图、图像、图标，甚至用于测试的预览内容。
 
-Using this architecture, future business requirements and data access services can be added without interfering with existing ones. This also allows more collaborative environment as different teams can work on different modules without interfering with each other.
+> 每个模块（如运输，库存，订购等）都可以由文件夹结构或包依赖项表示。这实际上取决于您的需求以及您是否希望在其他项目中重用您的模块。
 
-## View Specific Logic
+使用此体系结构，可以在不干扰现有需求的情况下添加未来的业务需求和数据访问服务。这也允许更多的协作环境，因为不同的团队可以在不同的模块上工作而不会相互干扰。
 
-In this last section, I talked about how aggregate models can serve as a single source of truth and provide required data to the views. But what about view specific logic? Where should that logic be placed and what options do we have to perform testing on that logic.
 
-In the code below, we want to filter the products based on the minimum and maximum price. The implementation is shown below:
+## 视图的特定逻辑
+
+在最后一部分中，我讨论了聚合模型如何充当单一事实来源并为视图提供所需的数据。但是视图特定的逻辑呢？应该将该逻辑放在哪里，以及我们必须使用哪些选项来对该逻辑进行测试。
+
+在下面的代码中，我们希望根据最低和最高价格过滤产品。实现如下所示：
 
 ```
 struct ContentView: View {
@@ -428,19 +441,19 @@ struct ContentView_Previews: PreviewProvider {
 }
 ```
 
-> If filterProducts or similar functions will be involved in any model logic then you can also put it inside the aggregate root model, instead of the view.
+> 如果 filterProducts 或类似函数将涉及任何模型逻辑，那么您也可以将其放在聚合根模型中，而不是视图中。
 
-Please note that instead of invoking the real service, we are using a stubbed version of the HTTPClient that returns pre-configured response. Another good option would be to create separate JSON files for each response and read data from those files, when using Xcode previews. I covered that in one of my YouTube video, [Building SwiftUI Xcode Previews Using JSON File](https://youtu.be/EycwLxTU-EA).
+请注意，我们没有调用真正的服务，而是使用返回预配置响应的 HTTPClient 的存根版本。另一个不错的选择是为每个响应创建单独的 JSON 文件，并在使用 Xcode 预览时从这些文件读取数据。我在我的一个YouTube视频中介绍了这一点，[使用JSON File构建SwiftUI Xcode Previews](https://youtu.be/EycwLxTU-EA)。
 
-> Keep in mind that in the above scenario, if no results are found during filtering then the original products array is returned.
+> 请记住，在上述方案中，如果在筛选过程中未找到结果，则返回原始产品数组。
 
-We have two pieces of code in the view that constitute as logic, `isFormValid` and `filterProducts`. If we want to test that code we have number of ways.
+我们在视图中有两段构成逻辑的代码， `isFormValid` 和 `filterProducts` 。如果我们想测试该代码，我们有很多方法。
 
-Use Xcode previews! I know this does not sound fancy but I encourage you to use Xcode previews to test your view based logic. Xcode previews is extremely fast (depending on the machine you are using) and it gives you the same feeling as Red/Green/Refactor cycle. For this particular scenario, Xcode previews will be my first choice.
+使用 Xcode 预览！我知道这听起来并不花哨，但我鼓励您使用 Xcode 预览来测试基于视图的逻辑。Xcode 预览非常快（取决于您使用的机器），它给你的感觉与红色/绿色/重构循环相同。对于这种特殊情况，Xcode 预览将是我的首选。
 
-> Xcode previews is not the answer to everything. If you are dealing with complicated view logic then it will be a good idea to move out all the logic into a separate struct and then write unit tests for that piece of code. Remember, one of the important aspects of why we test is to [gain confidence about our code](https://azamsharp.com/2023/02/15/testing-is-about-confidence.html).
+> Xcode 预览并不是所有问题的答案。如果您正在处理复杂的视图逻辑，那么最好将所有逻辑移到一个单独的结构中，然后为该代码段编写单元测试。请记住，我们测试的重要方面之一是[获得对我们代码的信心](https://azamsharp.com/2023/02/15/testing-is-about-confidence.html)。
 
-Another option is to extract the logic from the view and then write unit tests against it. This is shown in the implementation below:
+另一种选择是从视图中提取逻辑，然后针对它编写单元测试。这在下面的实现中显示：
 
 ```
 struct ProductFilterForm {
@@ -460,7 +473,7 @@ struct ProductFilterForm {
 }
 ```
 
-`ProductFilterForm` can now be unit tested in isolation. The unit test is shown below:
+`ProductFilterForm` 现在可以单独进行单元测试。单元测试如下所示：
 
 ```
 
@@ -497,11 +510,11 @@ func test_user_can_filter_products_by_price() throws {
 
 ```
 
-> Unit testing view’s logic in isolation as shown above can be beneficial for complicated user interfaces. Keep in mind that just because your unit test passes, does not mean that your user interface is working as expected.
+> 如上所示，单元测试视图的逻辑隔离对于复杂的用户界面可能很有用。请记住，仅仅因为单元测试通过，并不意味着用户界面按预期工作。
 
-And the final kind of test you can write is an end-to-end test. E2E tests are great because they test the app from user’s point of view and they are best against regression. The downside is that E2E tests are slower then running unit tests. The main reason they are slower is because they are testing the complete application instead of small units. Most of the issues in software exists because the application was tested at unit level and not at system level. I encourage you to spend some time writing meaningful E2E tests.
+你可以写的最终一种测试是端到端测试。E2E 测试很棒，因为它们从用户的角度测试应用程序，并且最适合防止回归。缺点是 E2E 测试比运行单元测试慢。它们较慢的主要原因是因为它们正在测试完整的应用程序而不是小单元。软件中的大多数问题之所以存在，是因为应用程序是在单元级别而不是系统级别进行测试的。我鼓励你花一些时间编写有意义的E2E测试。
 
-Here is an implementation of an E2E test for the above scenario.
+下面是上述方案的 E2E 测试的实现。
 
 ```
   func test_user_can_filter_products_based_on_price() {
@@ -527,15 +540,16 @@ Here is an implementation of an E2E test for the above scenario.
     }
 ```
 
-In the end you will have to decide where in [testing pyramid](https://martinfowler.com/articles/practical-test-pyramid.html) you want to invest your time to get the best return on your investment.
+最后，您将不得不决定在[测试金字塔](https://martinfowler.com/articles/practical-test-pyramid.html)中要投入时间以获得最佳投资回报。
 
-> If you want to learn more about testing then you can check out my course [Test Driven Development in iOS Using Swift](https://www.udemy.com/course/test-driven-development-in-ios-using-swift/?referralCode=07649C41E6E184CE86B3).
+> 如果你想了解更多关于测试的信息，那么你可以看看我的课程 [使用 Swift 在 iOS 中测试驱动开发](https://www.udemy.com/course/test-driven-development-in-ios-using-swift/?referralCode=07649C41E6E184CE86B3) 。
 
-## Screens vs Views
+## 屏幕与视图 
 
-When I was working with Flutter, I observed a common pattern for organizing the widgets. Flutter developers were separating the widgets based on whether the widgets represents an entire screen of just a reusable control. Since React, Flutter and SwiftUI are extremely similar in nature we can apply the same principles when building SwiftUI applications.
+当我使用 Flutter 时，我观察到一种组织小部件的常见模式。Flutter 开发人员根据小部件是否仅代表可重用控件的整个屏幕来分离小部件。由于 React、Flutter 和 SwiftUI 在本质上非常相似，因此我们可以在构建 SwiftUI 应用程序时应用相同的原则。
 
-For example when displaying details of a movie, instead of calling that view MovieDetailView, you can call it MovieDetailScreen. This will make it clear that the detail view is an actual screen and not some reusable child view. Here are few more examples.
+例如，在显示影片的详细信息时，可以将其称为 MovieDetailScreen，而不是将该视图称为 MovieDetailView。这将清楚地表明详细信息视图是实际屏幕，而不是一些可重用的子视图。下面再举几个例子。
+
 
 **Screens**
 
@@ -552,15 +566,16 @@ For example when displaying details of a movie, instead of calling that view Mov
 -   ReminderListView
 -   ReminderCellView
 
-I find that it is always a good idea to keep a close eye on our friendly neighbors React and Flutter. You never know what ideas you will bring from other declarative frameworks into SwiftUI.
+我发现密切关注我们友好的邻居 React 和 Flutter 总是一个好主意。你永远不知道你会从其他声明式框架中带来什么想法到 SwiftUI 中。
 
-## Validation
 
-There is a famous saying in software development, garbage in, garbage out. This means if you allow users to enter incorrect information (garbage) through the user interface then that garbage will eventually end up in your database. And usually when this happens, it becomes extremely difficult and time consuming to clean the database.
+## 验证
 
-You must take necessary steps to prevent users from submitting incorrect information in the first place.
+软件开发中有一句名言，垃圾进，垃圾出。这意味着，如果您允许用户通过用户界面输入不正确的信息（垃圾），那么垃圾最终将进入您的数据库。通常，当这种情况发生时，清理数据库变得非常困难和耗时。
 
-Consider a simple `LoginScreen` view with username and password TextFields. If we want to enable the login Button only when the view is validated correctly, we can use the implementation below:
+您必须采取必要的步骤来防止用户首先提交不正确的信息。
+
+考虑一个简单的 `LoginScreen` 视图，其中包含用户名和密码文本字段。如果我们想仅在视图正确验证时才启用登录按钮，我们可以使用以下实现：
 
 ```
 struct LoginScreen: View {
@@ -584,9 +599,9 @@ struct LoginScreen: View {
 }
 ```
 
-For such trivial logic, you can use Xcode Previews to quickly perform manual testing and validate the outcome.
+对于此类简单的逻辑，您可以使用 Xcode 预览快速执行手动测试并验证结果。
 
-If you are working on a more complicated form, then it is advised to extract it into its own struct. This concept is shown in the implementation below.
+如果您正在处理更复杂的表单，则建议将其提取到自己的结构中。此概念显示在下面的实现中。
 
 ```
 struct LoginFormConfig {
@@ -615,7 +630,7 @@ struct LoginScreen: View {
 }
 ```
 
-`LoginFormConfig` encapsulates the form validation. This also allows us to write unit tests against the LoginFormConfig. Few unit tests are shown below:
+`LoginFormConfig` 封装表单验证。这也允许我们针对 LoginFormConfig 编写单元测试。下面显示了几个单元测试：
 
 ```
 final class LearnTests: XCTestCase {
@@ -643,19 +658,20 @@ final class LearnTests: XCTestCase {
 }
 ```
 
-In the end extracting the form validation into a separate struct and writing unit tests for it depends on your level of confidence. Simple forms can be tested easily through Xcode Previews and do not require additional structure or even unit tests.
+最后，将表单验证提取到单独的结构中并为其编写单元测试取决于您的置信度。简单的表单可以通过 Xcode 预览轻松测试，不需要额外的结构甚至单元测试。
 
-> Validation helper functions like isEmptyOrWhiteSpace, isNumeric, isEmail, isLessThan can be moved into a separate Swift package. This will promote reusability and other projects can also benefit from using it.
+> 验证帮助程序函数，如isEmptyOrWhiteSpace，isNumeric，isEmail，isLessThan可以移动到单独的Swift包中。这将促进可重用性，其他项目也可以从使用它中受益。
 
-I covered few different ways of handling and displaying validation errors in one of my previous articles that you can read [here](https://azamsharp.com/2022/08/09/intro-to-mv-state-pattern.html).
+我在之前的一篇文章中介绍了几种处理和显示验证错误的不同方法，您可以在[此处阅读](https://azamsharp.com/2022/08/09/intro-to-mv-state-pattern.html)。
 
-## Displaying Errors
 
-Displaying errors is an integral part of any application.
+## 显示错误
 
-In SwiftUI, we can centralize displaying errors to a single place. This will prevent us from writing repetitive code and also provide a single point in codebase to change the layout and appearance.
+显示错误是任何应用程序不可或缺的一部分。
 
-We can start by creating an ErrorWrapper, which will be responsible for wrapping the actual error and also providing guidance to the user on the next steps.
+在 SwiftUI 中，我们可以将显示错误集中到一个位置。这将防止我们编写重复的代码，并在代码库中提供一个点来更改布局和外观。
+
+我们可以从创建一个 ErrorWrapper 开始，它将负责包装实际错误，并为用户提供后续步骤的指导。
 
 ```
 struct ErrorWrapper: Identifiable {
@@ -665,7 +681,7 @@ struct ErrorWrapper: Identifiable {
 }
 ```
 
-ErrorWrapper will be used by ErrorView. ErrorView will be responsible for displaying the details of the error in a visual format. You can find basic implementation of an ErrorView below.
+ErrorWrapper 将由 ErrorView 使用。ErrorView将负责以可视格式显示错误的详细信息。您可以在下面找到错误视图的基本实现。
 
 ```
 struct ErrorView: View {
@@ -685,9 +701,9 @@ struct ErrorView: View {
 }
 ```
 
-> ErrorView is simply a view and you can customize it as much as you want.
+> ErrorView只是一个视图，您可以根据需要对其进行自定义。
 
-In order to set the error wrapper from any part of our application, we will add an ErrorState as an ObservableObject and inject it in an EnvironmentObject.
+为了从应用程序的任何部分设置错误包装器，我们将添加一个 ErrorState 作为 ObservableObject 并将其注入到环境对象中。
 
 ```
 class ErrorState: ObservableObject {
@@ -712,15 +728,15 @@ struct StoreApp: App {
 
 ```
 
-Whenever the errorState changes, a sheet will be displayed with the latest error. Once again, you are free to use a different method of displaying the error instead of a sheet.
+每当错误状态更改时，将显示一个包含最新错误的工作表。同样，您可以自由使用不同的方法来显示错误，而不是工作表。
 
-This technique allows you to have a single point in your codebase, which is responsible for displaying errors.
+此技术允许您在代码库中有一个点，该点负责显示错误。
 
-## Grouping View Events
+## 分组视图与事件
 
-One way to create reusable views in SwiftUI is to delegate the events to the parent view. This allows views to be used in different scenarios and without tying them to a particular logic. One way to accomplish this is to use closures.
+在 SwiftUI 中创建可重用视图的一种方法是将事件委托给父视图。这允许视图在不同的方案中使用，而无需将它们绑定到特定逻辑。实现此目的的一种方法是使用闭包。
 
-Consider a `ReminderCellView`, which allows the user to perform check/uncheck and delete operations. The implementation is shown below:
+考虑一个 `ReminderCellView` ，它允许用户执行检查/取消选中和删除操作。实现如下所示：
 
 ```
 struct ReminderCellView: View {
@@ -746,7 +762,8 @@ struct ReminderCellView: View {
 }
 ```
 
-`ReminderCellView` exposes `onChecked` and `onDelete` closures. The caller can use these closures to perform a particular task. The calling side is shown below:
+`ReminderCellView` 公开了 `onChecked` 和 `onDelete` 闭包。调用者可以使用这些闭包来执行特定任务。调用方如下:
+
 
 ```
 struct ContentView: View {
@@ -763,9 +780,9 @@ struct ContentView: View {
 }
 ```
 
-As the complexity of `ReminderCellView` increases and it exposes more events then the calling side will become more complicated.
+随着 `ReminderCellView` 的复杂性增加，它会暴露更多的事件，那么调用方将变得更加复杂。
 
-We can fix this issue by grouping all the events into a simple enum. This is shown below:
+我们可以将所有事件分组到一个简单的枚举中来解决此问题。如下所示：
 
 ```
 enum ReminderCellEvents {
@@ -774,7 +791,7 @@ enum ReminderCellEvents {
 }
 ```
 
-The `ReminderCellView` can be updated to use `ReminderCellEvents`. This is shown below:
+可以使用`ReminderCellEvents`来对`ReminderCellView`进行操作和更新，如下：
 
 ```
 struct ReminderCellView: View {
@@ -799,7 +816,7 @@ struct ReminderCellView: View {
 }
 ```
 
-Now, instead of dealing with multiple closures we are only handling a single enum based event structure. The calling site also looks much cleaner.
+现在，我们不再处理多个闭包，而是只处理单个基于枚举的事件结构。调用站点看起来也干净得多。
 
 ```
 struct ContentView: View {
@@ -819,13 +836,14 @@ struct ContentView: View {
 }
 ```
 
-In the end you will have to decide when you want to group events into an enum and when you want to use them individually (multiple closures). I tend to prefer using enum events if I have more than two closures exposed by the view.
+最后，您必须决定何时要将事件分组到枚举中，以及何时要单独使用它们（多个闭包）。如果我的视图公开了两个以上的闭包，我倾向于使用枚举事件。
 
-## Navigation
 
-SwiftUI introduced NavigationStack in iOS 16, which allowed developers to configure global routes for their application.
+## 路由
 
-There are several different ways to handle routing in SwiftUI. One possible approach is to handle all the routes in the root view of the application. We will start by creating the Routes enum, which will setup the routes for entire application. The implementation is shown below:
+SwiftUI 在 iOS 16 中引入了 NavigationStack，它允许开发人员为其应用程序配置全局路由。
+
+在 SwiftUI 中，有几种不同的方法可以处理路由。一种可能的方法是处理应用程序根视图中的所有路由。我们将从创建路由枚举开始，它将为整个应用程序设置路由。实现如下所示：
 
 ```
 
@@ -846,9 +864,9 @@ enum Routes: Hashable {
 }
 ```
 
-The `Routes` enum represents the root routes for each section of the screen. This includes `catalog`, `inventory`, `shipping` etc. The routes for each section are declared inside their corresponding route enums (`CatalogRoutes`, `InventoryRoutes`).
+`Routes` 枚举表示屏幕每个部分的根路由。这包括`catalog`, `inventory`, `shipping` 等。每个部分的路线在其相应的路线枚举（`CatalogRoutes`、`InventoryRoutes`）中声明。
 
-For programmatic navigation, we added `NavigationState`. NavigationState keep tracks of all the routes and will be injected into the app through the `@EnvironmentObject`.
+对于编程路由，我们添加了 `NavigationState`。 NavigationState 跟踪所有路线，并将通过 `@EnvironmentObject` 注入到应用程序中
 
 ```
 class NavigationState: ObservableObject {
@@ -856,7 +874,7 @@ class NavigationState: ObservableObject {
 }
 ```
 
-Finally, we handle all the routes in our root view of the application. This is shown below:
+最后，我们在应用程序的根视图中处理所有路由。如下所示：
 
 ```
 @main
@@ -895,7 +913,7 @@ struct LearnApp: App {
 }
 ```
 
-The above approach works but, it can quickly get messy because we are putting all the routes of our application in a single place. One way to control this problem is to create separate routers for each section of the screen and allow routers to handle specific routing behavior. The implementation of `CatalogRouter` is shown below. CatalogRouter is responsible for handling all the routes related to the catalog screens.
+上述方法可行，但很快就会变得混乱，因为我们将应用程序的所有路由都放在一个地方。控制这个问题的一种方法是为屏幕的每个部分创建单独的路由器，并允许路由器处理特定的路由行为。`CatalogRouter`的实现如下所示。CatalogRouter负责处理与目录屏幕相关的所有路由。
 
 ```
 struct CatalogRouter {
@@ -912,7 +930,7 @@ struct CatalogRouter {
 }
 ```
 
-Similarly, we can add router for Inventory.
+同样，我们可以为清单添加路由器。
 
 ```
 struct InventoryRouter {
@@ -931,7 +949,7 @@ struct InventoryRouter {
 }
 ```
 
-Now, our navigationDestination looks much cleaner.
+现在，我们的导航目的地看起来更干净。
 
 ```
 @main
@@ -957,7 +975,7 @@ struct LearnApp: App {
 }
 ```
 
-If you need to call a certain route, you can append the route in `NavigationState`. This is shown in the implementation below:
+如果需要调用某个路由，可以在 `NavigationState` 中附加该路由。这在下面的实现中显示：
 
 ```
 struct ContentView: View {
@@ -981,50 +999,48 @@ struct ContentView: View {
 }
 ```
 
-> I am sure there are other ways of handling navigation in SwiftUI. Send me a [Gist](https://gist.github.com/) of your suggestion on [Twitter](https://twitter.com/azamsharp) and I will be more than happy to review it.
+> 我还写了一本关于 SwiftUI 导航 API 的书。如果您有兴趣，可以免费下载 [从这里开始](https://azamsharp.com/books) .
 
-> I also wrote a book on Navigation API in SwiftUI. If you are interested, you can download it free of charge from [here](https://azamsharp.com/books).
+## 测试
 
-## Testing
+> 本文的这一部分摘自我的文章 [务实的测试和避免常见的陷阱](https://azamsharp.com/2012/12/23/pragmatic-unit-testing.html)
 
-> This section of the article is taken from my post [Pragmatic Testing and Avoiding Common Pitfalls](https://azamsharp.com/2012/12/23/pragmatic-unit-testing.html)
+编写测试的主要目的是确保软件按预期工作。测试还让您确信，在一个模块中所做的更改不会破坏相同模块或其他模块中的内容。
 
-The main purpose of writing tests is to make sure that the software works as expected. Tests also gives you confidence that a change you make in one module is not going to break stuff in the same or other modules.
+并非所有应用程序都需要编写测试。如果要构建具有直接域的基本应用程序，则可以使用手动测试来测试完整的应用程序。话虽如此，在大多数专业环境中，您正在使用具有业务规则的复杂域。这些业务规则构成了公司运营和产生收入的基础。
 
-Not all applications requires writing tests. If you are building a basic application with a straight forward domain then you can test the complete app using manual testing. Having said that in most professional environments, you are working with a complicated domain with business rules. These business rules form the basis on which company operates and generates revenue.
+在本文中，我将讨论编写测试的不同技术，以及开发人员如何编写好的测试以获得最大的投资回报(ROI)。
 
-In this article, I will discuss different techniques of writing tests and how a developer can write good tests to get the most return on their investment.
+## 并非所有测试都等于
 
-## Not all tests are created equal
+考虑您正在为银行编写应用程序的情况。业务规则之一是在资金不足的情况下收取透支费。[银行仅通过收费就创造了数十亿美元的收入](https://www.depositaccounts.com/blog/banks-income-fees.html)。作为开发人员，您必须编写高质量的测试，以确保透支费用计算按预期工作。
 
-Consider a scenario that you are writing an application for a bank. One of the business rules is to charge overdraft fees in case of insufficient funds. Banks generate [billions of dollars income by just fees](https://www.depositaccounts.com/blog/banks-income-fees.html) alone. As a developer, you must write good quality tests to make sure that overdraft fee calculation works as expected.
+在同一银行应用程序中，您可能具有诸如呈现电子邮件模板或记录某些交互等功能。这些功能很重要，但与收取透支费相比，可能不会产生相同的投资回报。这意味着如果电子邮件模板格式不正确，那么银行就不会损失数百万美元，并且您将不会在半夜接到电话。如果日志记录是为开发人员准备的，那么在大多数情况下，您甚至不需要为其编写测试。这只是一个实现细节。
 
-In the same bank app, you may have features like rendering templates for emails or logging certain interactions. These features are important but may not produce the same return on investment as compared to charging overdraft fees. This means if the email template is not in the correct format then the banks are not going to loose millions of dollars and you will not receive a call in the middle of the night. If the logging is meant for developers then in most cases you don’t even need to write tests for it. It is just an implementation detail.
+> > 如果要构建日志记录框架，则必须彻底测试框架公开的公共 API。
 
-> > If you are building a logging framework then it is essential that you thoroughly test the public API exposed by your framework.
+下次编写测试时，请问问自己此功能对业务有多重要。如果它是业务不可或缺的一部分，请确保对其进行彻底测试并获得高代码覆盖率。
 
-Next time you are writing a test, ask yourself how important this feature is for the business. If it is an integral part of the business then make sure to test it thoroughly and go for high code coverage.
+## 测试行为而不是实现 
 
-## Test behavior not implementation
+开发人员犯的最大错误之一是专注于针对实现细节而不是应用程序的行为编写测试。
 
-One of the biggest mistakes developers make is to focus on writing tests against the implementation details instead of the behavior of the application.
+> > 添加新测试的触发器是要求，而不是类或函数。
 
-> > A trigger to add a new test is the requirement, not a class or a function.
+仅仅因为您添加了新类或函数并不意味着您将开始编写测试。这只是一个可以随时间变化的实现细节。测试应针对业务需求，而不是实现细节。
 
-Just because you added a new class or a function does not mean that you will start writing tests. That is just an implementation detail which can change overtime. Your tests should target the business requirements and not the implementation details.
+下面是从业务需求派生的几个行为示例：
 
-Here are few examples of behaviors, derived from business requirements:
+1.  当客户提取金额且资金不足时，则收取透支费。
+2.  一旦达到限制，客户指定的股票数量将以指定价格提交交易。
 
-1.  When a customer withdraw amount and has insufficient funds then charge an overdraft fee.
-2.  The number of stocks specified by customer are submitted for trade at a specified price, once the limit has reached.
+该行为源于项目的要求。检查实现细节而不是行为的测试往往非常脆弱，并且在实现更改时很容易中断，即使行为保持不变。
 
-The behavior stems from the requirement of the project. Tests that checks the implementation details instead of the behavior tends to be very brittle and can easily break when the implementation changes even though the behavior remains the same.
+让我们考虑一个方案，其中您正在构建一个应用程序以在屏幕上显示产品列表。这些产品是从JSON API获取的，并使用SwiftUI框架呈现，遵循MVVM设计模式的原则。
 
-Let’s consider a scenario, where you are building an application to display a list of products on the screen. The products are fetched from a JSON API and rendered using SwiftUI framework, following the principles of MVVM design pattern.
+首先，我们将研究大多数开发人员采用的测试上述场景的常用方法，然后我们将以更务实的方式实现测试。
 
-First we will look at a common way of testing the above scenario that is adopted by most developers and then later we will implement tests in a more **pragmatic** way.
-
-The complete app might look like the implementation below:
+完整的应用可能类似于下面的实现：
 
 ```
 class Webservice {
@@ -1085,11 +1101,11 @@ struct ProductListScreen: View {
 }
 ```
 
-The above application works as expected and produces the expected result. Instead of testing the concrete implementation of the `Webservice`, we will introduce an interface/contract/protocol just so that we can inject a mock. The sole purpose of creating the protocol is to satisfy the tests, even though there is only one concrete implementation that conforms to that protocol/interface.
+上述应用程序按预期工作并产生预期的结果。而不是测试 `Webservice` 的具体实现，我们将引入一个接口/合约/协议，以便我们可以注入一个模拟。创建协议的唯一目的是满足测试，即使只有一个符合该协议/接口的具体实现。
 
-> > This is called [**Test Induced Damage**](https://dhh.dk/2014/test-induced-design-damage.html). The tests are dictating that we should add dependencies so you can mock out the service. The only purpose of introducing a protocol/contract/interface is so you can eventually mock it. Keep in mind there is nothing wrong with using protocols/contracts in your application. They do serve a very important purpose to hide the implementation details from the user and providing abstraction, but just to add contracts to satisfy testing goals in not a good practice as it complicates the implementation and your tests are directed away from testing the actual behavior of the app.
+> > 这称为 [测试引起的损伤](https://dhh.dk/2014/test-induced-design-damage.html) .测试规定我们应该添加依赖项，以便您可以模拟服务。引入协议/合约/接口的唯一目的是让你最终可以模拟它。请记住，在应用程序中使用协议/协定没有错。它们确实有一个非常重要的目的，即向用户隐藏实现细节并提供抽象，但只是添加合约以满足测试目标，这不是一个好的做法，因为它使实现复杂化，并且您的测试远离测试应用程序的实际行为。
 
-In the code below we have introduced a WebserviceProtocol. Both Webservice and the newly created MockedWebservice conforms to the WebserviceProtocol as shown below:
+在下面的代码中，我们引入了一个WebserviceProtocol。Web服务和新创建的模拟Web服务都符合Webservice协议，如下所示：
 
 ```
 protocol WebserviceProtocol {
@@ -1113,9 +1129,9 @@ class MockedWebService: WebserviceProtocol {
 }
 ```
 
-> > You should probably use a better name, instead of calling it WebserviceProtocol. The main reason, I am calling it WebserviceProtocol is just for the sake of simplicity and convenience.
+> > 您可能应该使用更好的名称，而不是将其称为WebserviceProtocol。我称之为WebserviceProtocol的主要原因只是为了简单和方便。
 
-The webservice is now injected as a dependency to our ProductListViewModel. This is shown below:
+Web 服务现在作为依赖项注入到我们的 ProductListViewModel。如下所示：
 
 ```
 class ProductListViewModel: ObservableObject {
@@ -1139,7 +1155,7 @@ class ProductListViewModel: ObservableObject {
 }
 ```
 
-The view, ProductListScreen is also updated to reflect the change.
+`ProductListScreen`视图也会更新以反映更改。
 
 ```
 struct ProductListScreen: View {
@@ -1156,9 +1172,9 @@ struct ProductListScreen: View {
 }
 ```
 
-> > WebserviceFactory is responsible for either returning the Webservice or MockedWebservice, depending on the application environment.
-
-Now, let’s go ahead and check out the test.
+> > WebserviceFactory 负责返回 Web 服务或 MockedWebservice，具体取决于应用程序环境。
+> 
+现在，让我们继续检查测试。
 
 ```
 final class ProductsTests: XCTestCase {
@@ -1180,31 +1196,32 @@ final class ProductsTests: XCTestCase {
 }
 ```
 
-We created an instance of `MockedWebservice` inside our test and pass it to the `ProductListViewModel`. Next, we invoke the `populateProducts` function on the view model and then check to make sure that the `fetchProducts` on the mockedWebservice instance was called. Finally, the test checks the products property of the \`\`\`\`ProductListViewModel\`\`\` instance to make sure that is is populated correctly.
+我们在测试中创建了`MockedWebservice`的一个实例，并将其传递给`ProductListViewModel`。接下来，我们在视图模型上调用`populateProducts`函数，然后检查确保`mockedWebservice`实例上的`fetchProducts`被调用。最后，测试检查`ProductListViewModel`实例的`products`属性以确保其正确填充。
 
-The problem with the above test is that it is not testing the behavior but the implementation. The following line of code is an implementation detail.
+上述测试的问题在于它不是测试行为，而是测试实现。以下代码行是实现详细信息。
 
 ```
 verify(mockedWebService.fetchProducts()).wasCalled()
 ```
 
-This means if you decide to refactor your code and rename the function `fetchProducts` to `getProducts` then your test will fail. These kind of tests are often known as brittle tests as they break when the internal implementation changes even though the functionality/behavior provided by the API remains the same. This is also the main reason that your test should validate the behavior instead of the implementation.
+这意味着，如果您决定重构代码并将`fetchProducts`函数重命名为`getProducts`，则您的测试将失败。这些类型的测试通常被称为脆弱测试，因为当内部实现发生变化时，它们会失败，即使API提供的功能/行为仍然相同。这也是您的测试应该验证行为而不是实现的主要原因。
 
-> The code that you write is a liability, including tests. When writing tests, focus on the quality of the tests instead of the quantity. Remember, you are not only responsible for writing tests but also maintaining them.
+> 你编写的代码是一种责任，包括测试。编写测试时，请关注测试的质量而不是数量。请记住，您不仅负责编写测试，还负责维护它们。
 
-> If you are using MVVM pattern then your VM may have logic. It is perfectly fine to write unit tests against the logic contained in the view model.
 
-## End to End Testing
+> 如果使用的是 MVVM 模式，则 VM 可能具有逻辑。针对视图模型中包含的逻辑编写单元测试是完全可以的。
 
-In the previous section, you learned that and mocking in most scenarios does not provide the return on your investment. Tests written that use mocking usually end up being too brittle and can fail because of refactoring, breaking all the dependent tests even though the behavior remained the same.
+## 端到端测试
 
-Human psychology also plays an important role when writing tests. As software developers we want fast feedback with small amounts of dopamine hit along the way. There is nothing wrong with receiving fast feedback. Fast feedback is one of the important characteristics of a unit test. Unfortunately, sometimes we are going too fast to realize that we were on the wrong path. We start behaving like a test addict, who wants to see green checkmarks alongside the tests instantly.
+在上一节中，您了解到，在大多数情况下，模拟并不能提供投资回报。使用模拟编写的测试通常最终会太脆弱，并且可能会因为重构而失败，即使行为保持不变，也会破坏所有依赖的测试。
 
-As explained earlier adding tests that test the implementation details instead of behavior does not provide any benefit to your project. It may even work against you in the long run since now you will be responsible for maintaining those test cases and anytime the implementation detail changes, all your test will break even though the functionality remained the same.
+在编写测试时，人类心理学也起着重要作用。作为软件开发人员，我们希望快速反馈少量的多巴胺。接收快速反馈并没有错。快速反馈是单元测试的重要特征之一。不幸的是，有时我们走得太快，以至于没有意识到我们走错了路。我们开始表现得像一个测试成瘾者，他希望立即在测试旁边看到绿色复选标记。
 
-> I am not proposing that you should not write unit tests. Unit tests are great when you are testing small units of code. I am proposing that you must make sure that you are testing the behavior of the code and not implementation details. This means if you want to write unit tests for your view models, you can.
+如前所述，添加测试实现细节而不是行为的测试不会为您的项目带来任何好处。从长远来看，它甚至可能对您不利，因为现在您将负责维护这些测试用例，并且每当实现细节发生变化时，即使功能保持不变，您的所有测试也会中断。
 
-Apart from unit tests and integration tests, end to end tests are best against regression. A good end to end will test one complete story/behavior. Below you can find the implementation of an end to end test.
+> 我并不是建议你不应该编写单元测试。单元测试在测试小型代码单元时非常有用。我建议你必须确保你测试的是代码的行为，而不是实现细节。这意味着，如果要为视图模型编写单元测试，则可以。
+
+除了单元测试和集成测试之外，端到端测试最适合防止回归。一个好的端到端将测试一个完整的故事/行为。您可以在下面找到端到端测试的实现。
 
 ```
 final class ProductTests: XCTestCase {
@@ -1250,23 +1267,23 @@ final class ProductTests: XCTestCase {
 }
 ```
 
-> > Developers can run E2E tests locally on their development machine. This will require initial setup such as testing framework, test environment, dependencies (database, services). E2E tests can be time-consuming, as a result developers may choose to run E2E tests less frequently than unit tests or other types of tests.
+> > 开发人员可以在其开发计算机上本地运行 E2E 测试。这将需要初始设置，例如测试框架、测试环境、依赖项（数据库、服务）。E2E 测试可能非常耗时，因此开发人员可能会选择运行 E2E 测试的频率低于单元测试或其他类型的测试。
 
-E2E tests are slower than the previous tests discussed earlier in the section but the main reason they are slower is because they tests all layers of the application. E2E tests are complete test and targets a particular behavior of the app.
+E2E 测试比本节前面讨论的前面的测试慢，但它们较慢的主要原因是因为它们测试应用程序的所有层。E2E 测试是完整的测试，针对应用的特定行为。
 
-End to end tests also requires some initial setup that will allow your test to run database migrations, insert seed data, simulate user interface events and then rolling back changes after the tests are completed.
+端到端测试还需要一些初始设置，以允许测试运行数据库迁移、插入种子数据、模拟用户界面事件，然后在测试完成后回滚更改。
 
-End to end tests are NOT replacement of your domain model tests. You MUST write tests against your domain models, specially if your app is domain heavy and consists of lots of business rules.
+端到端测试不能替代域模型测试。您必须针对域模型编写测试，特别是如果您的应用是域密集型的并且包含大量业务规则。
 
-> > You will have to find the right balance as to how often to run end to end tests. If you run it with each code check-in then your continuous integration server will always be running 100% of the time. If you run it once every couple of days then you will be notified of failures much later than expected. Keep in mind that you can run E2E tests locally on your machine. Once you get the desired outcome, the CI server can run all the tests during the code check-in process.
+> > 您必须在运行端到端测试的频率上找到适当的平衡。如果在每次签入代码时运行它，则持续集成服务器将始终在 100% 的时间内运行。如果每隔几天运行一次，则故障通知将比预期晚得多。请记住，您可以在计算机上本地运行 E2E 测试。获得所需结果后，CI 服务器可以在代码签入过程中运行所有测试。
 
-## What about Integration Testing
+## 集成测试
 
-Integration tests are performed to make sure that two different systems can work together. These systems can be external dependencies like database or API but it can also be different modules within the same system.
+执行集成测试以确保两个不同的系统可以协同工作。这些系统可以是外部依赖项，如数据库或API，但也可以是同一系统中的不同模块。
 
-Dependencies can be classified as managed and unmanaged dependencies. A managed dependency includes database, file systems etc. For managed dependencies, it is important that you use real instance and not a mock. Unmanaged dependencies include SMTP server, payment gateway etc. For unmanaged dependencies use mocks to verify their behavior.
+依赖项可分为托管依赖项和非托管依赖项。托管依赖项包括数据库、文件系统等。对于托管依赖项，使用真实实例而不是模拟实例非常重要。非托管依赖项包括SMTP服务器，支付网关等。对于非托管依赖项，请使用模拟来验证其行为。
 
-Let’s check out a sample integration test for a network service for user login operation.
+让我们查看用于用户登录操作的网络服务的示例集成测试。
 
 ```
 // This test is generated by ChatGPT AI 
@@ -1307,15 +1324,15 @@ class IntegrationTests: XCTestCase {
 
 ```
 
-The above integration test makes sure that the HTTP client layer is working as expected. The integration is between the network client and the server. The client is making sure that the response is correct and valid for a successful login operation.
+上述集成测试可确保 HTTP 客户端层按预期工作。集成是在网络客户端和服务器之间进行的。客户端确保响应正确且有效，以便成功执行登录操作。
 
-Unmanaged dependencies like payment gateway, SMTP clients etc can be mocked out during integration tests. For managed dependencies, use the concrete implementations.
+非托管依赖项（如支付网关，SMTP客户端等）可以在集成测试期间模拟出来。对于托管依赖项，请使用具体的实现。
 
-## Code Coverage
+## 代码覆盖率
 
-Code coverage is a metric that calculates how much of your code is covered under test. Let’s take a very simple example. In the code below we have a `BankAccount` class, which consists of `deposit` and `withdraw` functions.
+代码覆盖率是一个指标，用于计算测试中覆盖了多少代码。让我们举一个非常简单的例子。在下面的代码中，我们有一个 `BankAccount` 类，它由 `deposit` 和 `withdraw` 函数组成。
 
-> > Keep in mind that in real world scenario, a bank account is not implemented as a calculator. A bank account is recorded in a ledger, where all financial transactions are persisted.
+> > 请记住，在实际场景中，银行帐户不是作为计算器实现的。银行帐户记录在分类帐中，其中保留了所有财务交易。
 
 ```
 class BankAccount {
@@ -1337,7 +1354,7 @@ class BankAccount {
 }
 ```
 
-One possible test for the BankAccount may check if the account is successfully deposited.
+银行账户的一个可能的测试是检查账户是否成功存款。
 
 ```
 final class BankAccountTests: XCTestCase {
@@ -1352,49 +1369,49 @@ final class BankAccountTests: XCTestCase {
 }
 ```
 
-If this is the only test we have in our test suite then our code coverage is not 100%. This means not all paths/functions are under test. This is true because we never implemented the test for `withraw` function.
+如果这是我们测试套件中唯一的测试，那么我们的代码覆盖率不是 100%。这意味着并非所有路径/函数都在测试中。这是真的，因为我们从未实现过 `withraw` 函数的测试。
 
-You may be wondering that should you always have 100% code coverage. The simple answer is NO. But it also depends on the apps that you are working on. If you are writing code for NASA, where it will be responsible for landing rover on Mars then you better make sure that every single line is tested and your code coverage is 100%.
+您可能想知道是否始终拥有 100% 的代码覆盖率。简单的答案是否定的。但这也取决于您正在处理的应用程序。如果你正在为NASA编写代码，它将负责火星上的着陆漫游车，那么你最好确保每一行都经过测试，并且你的代码覆盖率是100%。
 
-If you are implementing an app for a pace maker device that helps to regulate the heartbeat then you better make sure that your code coverage is 100%. One line of missed and untested code can result in someones life… literally.
+如果您正在为有助于调节心跳的起搏器设备实现应用程序，那么您最好确保您的代码覆盖率为 100%。一行丢失和未经测试的代码可能会导致某人的生活......按照字面。
 
-So, what is the ideal code coverage number. It really depends on the app but any number above 70% is considered a decent code coverage.
+那么，理想的代码覆盖率是多少。这实际上取决于应用程序，但任何高于 70% 的数字都被认为是一个不错的代码覆盖率。
 
-> > When calculating code coverage make sure to ignore the third party libraries/frameworks as their code coverage is not your responsibility.
+> > 在计算代码覆盖率时，请确保忽略第三方库/框架，因为它们的代码覆盖率不是您的责任。
 
-## Unit Testing, Data Access and File Access
+## 单元测试、数据访问和文件访问 
 
-Most developers that I have talked to believe that a unit test cannot access a database or a file system. **That is incorrect and plain wrong**. A unit test CAN access a database or a file system.
+与我交谈过的大多数开发人员都认为单元测试无法访问数据库或文件系统。**这是不正确的，而且是完全错误的**。单元测试可以访问数据库或文件系统。
 
-It is very important to understand that `Unit test is the isolation, not the thing under test`. This is so important that I am going to repeat it again.
+了解 **单元测试是隔离，而不是被测试的东西** 非常重要。这一点非常重要，我将再次重复一遍。
 
 > > Unit test is the isolation, not the thing under test
 
-One of the valid reasons of not accessing a database or a file system during unit tests is that a test may leave data behind which may cause other tests to behave in unexpected manner. The solution is to make sure that the database is always reverted to an initial state after each test is completed so that future tests gets a clean database without any side effects.
+在单元测试期间不访问数据库或文件系统的正当原因之一是，测试可能会留下数据，这可能会导致其他测试以意外的方式运行。解决方案是确保在每次测试完成后始终将数据库恢复到初始状态，以便将来的测试获得一个干净的数据库，而没有任何副作用。
 
-Some frameworks also allows you to construct in-memory databases. Core Data for instance uses SQLite by default but it can be configured to use an in-memory database as shown below:
+某些框架还允许您构造内存数据库。例如，Core Data 默认使用 SQLite，但可以将其配置为使用内存数据库，如下所示：
 
 ```
 storeDescription.type = NSInMemoryStoreType
 ```
 
-In-memory database provides several benefits including:
+内存数据库具有多种优势，包括：
 
 -   No removal of test data
 -   Run faster
 -   Can be initialized before each test run
 
-Even thought these benefits looks appealing, I personally do not recommend using in-memory database for testing purposes. The main reason is that in-memory databases does not represent an actual production environment. This means you may not encounter the same issues during tests, which you may witness when using an actual database.
+即使认为这些好处看起来很吸引人，我个人也不建议使用内存数据库进行测试。主要原因是内存中数据库并不代表实际的生产环境。这意味着您在测试期间可能不会遇到相同的问题，在使用实际数据库时可能会遇到这些问题。
 
-> > It is always a good idea to to make sure that your test environment and production environment are nearly identical in nature.
+> > 确保测试环境和生产环境在本质上几乎相同始终是一个好主意。
 
-## Testing View Model Does NOT Validate the User Interface
+## 测试视图模型不验证用户界面 
 
-Couple of weeks ago, I was having a discussion with another developer, who was mentioning that they test their **user interface** through View Models in SwiftUI. I was not sure what he meant so I checked the source code and found that they had lot of unit tests for their View Models and they were just assuming that if the View Model tests are passing then the user interface will automatically work.
+几周前，我与另一位开发人员进行了讨论，他提到他们通过 SwiftUI 中的视图模型测试他们的用户界面。我不确定他的意思，所以我检查了源代码，发现他们对他们的视图模型有很多单元测试，他们只是假设如果视图模型测试通过，那么用户界面将自动工作。
 
-> Please keep in mind that I am not suggesting that you should not write unit tests for your View Models. I am simply saying that your View Model unit tests does not validate that the user interface is working as expected.
+> 请记住，我并不是建议你不应该为视图模型编写单元测试。我只是说您的视图模型单元测试不会验证用户界面是否按预期工作。
 
-Let’s take a very simple example of building a counter application.
+让我们举一个非常简单的构建计数器应用程序的示例。
 
 ```
 class CounterViewModel: ObservableObject {
@@ -1421,9 +1438,9 @@ struct ContentView: View {
 }
 ```
 
-When the increment button is pressed, we call the increment function on the CounterViewModel instance and increment the count. Since count property is decorated with @Published property wrapper, it notifies the view to reevaluate and eventually rerender.
+按下递增按钮时，我们在 CounterViewModel 实例上调用递增函数并递增计数。由于 count 属性是用@Published属性包装器修饰的，因此它会通知视图重新计算并最终重新呈现。
 
-In order to test that the count is incremented and displayed on the screen, the following unit test was written.
+为了测试计数是否递增并显示在屏幕上，编写了以下单元测试。
 
 ```
 import XCTest
@@ -1440,11 +1457,11 @@ final class LearnTests: XCTestCase {
 }
 ```
 
-This is a perfectly **valid** unit test but it does not verify that the count has been updated and displayed on the screen. Let me repeat it again. **A View Model unit test does not verify that the count is successfully displayed on the screen. This is a unit test not a UI test.**
+这是一个完全有效的单元测试，但它不会验证计数是否已更新并显示在屏幕上。让我再重复一遍。**视图模型单元测试不会验证计数是否成功显示在屏幕上。这是一个单元测试，而不是 UI 测试。**
+ 
+若要证明视图模型单元测试不验证用户界面元素，只需从 ContentView 中删除按钮视图甚至文本视图。单元测试仍将通过。这可能会让您错误地相信您的界面正在工作。
 
-To prove that a View Model unit test does not verify user interface elements, simply remove the Button view or even the Text view from the ContentView. The unit test will still pass. This can give you false confidence that your interface is working.
-
-A better way to verify that a user interface is working as expected is to implement a UI test. Take a look at the following implementation.
+验证用户界面是否按预期工作的更好方法是实现 UI 测试。看看下面的实现。
 
 ```
 final class LearnUITests: XCTestCase {
@@ -1460,34 +1477,34 @@ final class LearnUITests: XCTestCase {
 }
 ```
 
-This test will launch the app in a simulator and verify that when the button is pressed, label is updated correctly.
+此测试将在模拟器中启动应用，并验证按下按钮时标签是否正确更新。
 
-> Depending on the complexity of the behavior you are testing, you may not even need to write a user interface test. I have found that most of the user interfaces can be tested quickly using Xcode Previews.
+> 根据要测试的行为的复杂性，您甚至可能不需要编写用户界面测试。我发现大多数用户界面都可以使用 Xcode 预览快速测试。
 
-So what is the right balance? How many unit tests should you have for your View Model as compared to UI tests.
+那么什么是正确的平衡呢？与 UI 测试相比，视图模型应有多少单元测试。
 
-The answer is **it depends**. If you have complicated logic in your View Model then unit test can help. UITest (E2E) tests provide the best defense against regression. For each story, you can write couple of long happy path user interface tests and couple of edge cases. Once again, this really depends on the story and the complexities associated with the story.
+答案是**视情况而定**。如果您的视图模型中有复杂的逻辑，那么单元测试会有所帮助。UITest （E2E） 测试提供了针对回归的最佳防御。对于每个故事，您可以编写几个长快乐路径用户界面测试和几个边缘情况。再一次，这真的取决于故事和与故事相关的复杂性。
 
-In the end [testing is all about **confidence**](https://azamsharp.com/2023/02/15/testing-is-about-confidence.html). Sometimes you can gain confidence by writing fewer or no tests and other times you have to write more tests to achieve the level of confidence.
+最后，[测试关乎信心](https://azamsharp.com/2023/02/15/testing-is-about-confidence.html)。有时您可以通过编写较少或不编写测试来获得信心，而其他时候您必须编写更多测试才能达到置信度。
 
-## The Ideal test
+## 理想测试 
 
-We talked about several different types of tests. You may be wondering what is the best kind of test to write. What is the ideal test?
+我们讨论了几种不同类型的测试。您可能想知道编写哪种测试是最好的。什么是理想的测试？
 
-Unfortunately, there is no ideal test. It all depends on your project and requirements. If your project is domain heavy then you should have more domain level tests. If your project is UI heavy then your should have end to end tests. Finally, if your project integrates with managed and unmanaged dependencies then integration tests will be more suitable in those scenarios.
+不幸的是，没有理想的测试。这完全取决于您的项目和要求。如果您的项目是域繁重的，那么您应该进行更多的域级别测试。如果你的项目是UI繁重的，那么你应该有端到端的测试。最后，如果您的项目与托管和非托管依赖项集成，则集成测试将更适合这些方案。
 
-Remember to test the public API exposed by the module and not the implementation details. This way you can write useful quality tests, which will also help you to catch errors.
+请记住测试模块公开的公共 API，而不是实现细节。通过这种方式，您可以编写有用的质量测试，这也将帮助您捕获错误。
 
-Don’t create protocols/interfaces/contracts with the sole purpose of mocking. If a protocol consists of a single concrete implementation then use the concrete implementation and remove the interface/contract. Your architecture should be based on current business needs and not on what if scenarios that may never happen. Remember YAGNI (You aren’t going to need it). Less code is better than more code.
+不要创建协议/接口/合约，其目的只是为了嘲笑。如果协议由单个具体实现组成，则使用具体实现并删除接口/合约。体系结构应基于当前的业务需求，而不是基于可能永远不会发生的假设方案。记住YAGNI（你不需要它）。代码少比代码多好。
 
-## Conclusion
+## 总结
 
-Application architecture is a complicated subject and in the end the best architecture for a project depends on many factors. These factors can include the size and complexity of the project, the team’s skills and experience, the project’s goals and requirements.
+应用程序架构是一个复杂的主题，最终项目的最佳架构取决于许多因素。这些因素可能包括项目的规模和复杂性、团队的技能和经验、项目的目标和要求。
 
-Ultimately, the key to a successful application architecture is to choose a pattern that fits the project’s unique needs, and to constantly evaluate and adjust the architecture as the project evolves.
+最终，成功的应用程序架构的关键是选择适合项目独特需求的模式，并随着项目的发展不断评估和调整架构。
 
-By investing time and resources into designing a thoughtful and effective application architecture, teams can ensure that their codebase is maintainable, scalable, and flexible enough to adapt to changing requirements and technology trends.
+通过投入时间和资源来设计周到且有效的应用程序架构，团队可以确保其代码库具有可维护性、可扩展性和灵活性，足以适应不断变化的需求和技术趋势。
 
-## Origin Link
+## 原文链接
 
-* [AzamSharp](http://azamsharp.com/)
+* [Building Large-Scale Apps with SwiftUI: A Guide to Modular Architecture](https://azamsharp.com/2023/02/28/building-large-scale-apps-swiftui.html)
