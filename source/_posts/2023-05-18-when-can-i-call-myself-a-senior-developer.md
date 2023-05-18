@@ -7,7 +7,7 @@ tags:
 feature: true
 categories: 
 - 技术人生
-cover: https://raw.githubusercontent.com/zycslog/assets-pro/main/fotis-fotopoulos-SyvsTmuuZyM-unsplash.jpg
+cover: https://raw.githubusercontent.com/zycslog/assets-pro/main/senior-developer.jpg
 ---
 
 Renan Benatti Dias目前处于高级开放岗位，但是在此之前他在中级开发岗位停留了很长时间。在此期间，他思考了成为高级开发人员需要什么，如何准备以及如果掌握了所需技术能力和敢于承担责任后，最终该如何做好职业规划等。文中，他概述了高级开发人员所需的必要技术能力和经验等，并给当前各阶段开发人员提了很多有用的建议，例如扎实的技术基础、职业软技能的训练、寻找机会等等。
