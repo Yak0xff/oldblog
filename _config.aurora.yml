@@ -120,8 +120,8 @@ site_meta:
 gitalk:
   enable: true
   autoExpand: true
-  clientID: 'Iv1.5ddf524debf14dee'
-  clientSecret: '428ff0956ad74adc074fd558ab9bedc49ec55768'
+  clientID: '2324a9799cc77e8a702f'
+  clientSecret: '9bca47e66e6b0f41e0217978c57c0bdfb7eb9d2f'
   repo: 'zycslog.github.io'
   owner: 'zycslog'
   admin: ['zycslog']
