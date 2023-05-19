@@ -81,6 +81,7 @@ menu:
 theme:
   dark_mode: auto
   profile_shape: circle # support `circle`, `diamond`, `rounded`
+  feature: true
   gradient:
     color_1: '#24c6dc'
     color_2: '#5433ff'
@@ -118,7 +119,7 @@ site_meta:
 
 # For local development only!
 gitalk:
-  enable: true
+  enable: false
   autoExpand: true
   clientID: '2324a9799cc77e8a702f'
   clientSecret: '9bca47e66e6b0f41e0217978c57c0bdfb7eb9d2f'
@@ -134,15 +135,15 @@ gitalk:
 # Valine comment plugin (recommended!)
 # see https://valine.js.org/quickstart.html
 valine:
-  enable: false
-  app_id:
-  app_key:
+  enable: true
+  app_id: MIq5kQjY23bi6xFLq4FSmnjo-gzGzoHsz
+  app_key: ivK9pbbXsipJldb0RfzEL9VU
   avatar: ''
   placeholder: Leave your thoughts behind~
   visitor: true
-  lang: en
+  lang: cn
   meta: ['nick', 'mail']
-  admin: 'TriDiamond'
+  admin: 'Yak'
   recentComment: true
 
 # Enable Busuanzi statistic plugin
