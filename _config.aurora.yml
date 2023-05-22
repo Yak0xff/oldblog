@@ -50,12 +50,27 @@ menu:
   About: true
   Tags: true
   Archives: true
-  message-board:
-    name: 'MessageBoard'
+  Starlinks:
+    name: "Special Recommended"
     i18n:
-      cn: '留言板'
-      en: 'Message Board'
-    path: '/page/message-board'
+      cn: '特别推荐'
+      en: 'Special Recommended'
+    path: 
+    children:
+      stevejobsarchive:
+        name: 'Steve Jobs Archive'
+        path: 'https://stevejobsarchive.com/'
+      NetNewsWire:
+        name: 'NetNewsWire'
+        path: 'https://netnewswire.com/'
+
+
+  # message-board:
+  #   name: 'MessageBoard'
+  #   i18n:
+  #     cn: '留言板'
+  #     en: 'Message Board'
+  #   path: '/page/message-board'
   # Swift:
   #   name: 'Swift Learning'
   #   i18n:
@@ -71,8 +86,8 @@ menu:
   #   path:
   #   children:
   #     obsidian:
-  #       name: 'Obsidian Theme'
-  #       path: 'https://github.com/tridiamond'
+        # name: 'Obsidian Theme'
+        # path: 'https://github.com/tridiamond'
 
 #! ---------------------------------------------------------------
 #! Theme Config
