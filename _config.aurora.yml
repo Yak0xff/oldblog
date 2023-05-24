@@ -63,14 +63,12 @@ menu:
       NetNewsWire:
         name: 'NetNewsWire'
         path: 'https://netnewswire.com/'
-
-
-  # message-board:
-  #   name: 'MessageBoard'
-  #   i18n:
-  #     cn: '留言板'
-  #     en: 'Message Board'
-  #   path: '/page/message-board'
+  message-board:
+    name: 'MessageBoard'
+    i18n:
+      cn: '留言板'
+      en: 'Message Board'
+    path: '/page/message-board'
   # Swift:
   #   name: 'Swift Learning'
   #   i18n:
