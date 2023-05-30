@@ -6,7 +6,8 @@
     "build": "hexo generate",
     "clean": "hexo clean",
     "deploy": "hexo deploy",
-    "server": "hexo server"
+    "server": "hexo server",
+    "install": "npm-git install"
   },
   "hexo": {
     "version": "6.3.0"
@@ -21,7 +22,8 @@
     "hexo-renderer-marked": "^6.0.0",
     "hexo-renderer-stylus": "^2.1.0",
     "hexo-server": "^3.0.0",
-    "hexo-theme-aurora": "^1.5.5",
-    "hexo-theme-landscape": "^1.0.0"
+    "hexo-theme-aurora": "https://github.com/auroral-ui/hexo-theme-aurora.git#e5b1628",
+    "hexo-theme-landscape": "^1.0.0",
+    "npm-git-install": "^0.3.0"
   }
 }
